@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>町内会コミュニティ</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6', // blue-500
+                        primary_hover: '#2563eb', // blue-600
+                        admin: '#ef4444', // red-500
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* フェードインアニメーション */
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        /* モーダル表示時の背景固定用 */
+        body.modal-open { overflow: hidden; }
+        /* テキストの行数制限 */
+        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col">
+
+    <!-- 共通ヘッダー -->
+    <header id="header" class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-10 hidden">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white">
+                    <i data-lucide="users" class="w-5 h-5"></i>
+                </div>
+                <span class="font-bold text-lg tracking-tight">町内会コミュニティ</span>
+            </div>
+            <!-- ナビゲーションメニュー (JSで動的生成) -->
+            <nav id="nav-menu" class="flex items-center gap-1 sm:gap-4"></nav>
+        </div>
+    </header>
+
+    <!-- メインコンテンツ領域 -->
+    <main class="flex-grow w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- ==============================
+             ログイン画面 (SCR01)
+        ============================== -->
+        <div id="page-login" class="page-view flex flex-col items-center justify-center min-h-[70vh] fade-in">
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 w-full max-w-md text-center">
+                <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-primary mx-auto mb-4">
+                    <i data-lucide="leaf" class="w-8 h-8"></i>
+                </div>
+                <h1 class="text-2xl font-bold mb-2">ログイン</h1>
+                <p class="text-sm text-gray-500 mb-8">町内会コミュニティへようこそ</p>
+                
+                <form onsubmit="event.preventDefault();" class="space-y-4 mb-8 text-left">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">メールアドレス</label>
+                        <input type="email" placeholder="example@email.com" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">パスワード</label>
+                        <input type="password" placeholder="••••••••" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    <button type="button" onclick="loginAs('user')" class="w-full bg-primary hover:bg-primary_hover text-white font-medium py-2.5 rounded-lg transition-colors">
+                        ログイン
+                    </button>
+                </form>
+
+                <div class="border-t border-gray-100 pt-6">
+                    <p class="text-xs text-gray-400 mb-3">UI確認用 テストログインボタン</p>
+                    <div class="flex gap-2 justify-center">
+                        <button onclick="loginAs('user')" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-lg transition-colors">
+                            町内会メンバーとして
+                        </button>
+                        <button onclick="loginAs('admin')" class="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-700 text-sm rounded-lg transition-colors">
+                            役員(管理者)として
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==============================
+             メンバー一覧画面 (カード形式)
+        ============================== -->
+        <div id="page-members" class="page-view hidden fade-in">
+            <div class="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">メンバー組織図</h2>
+                    <p class="text-sm text-gray-500 mt-1">町内会の参加メンバーです。カードをクリックすると詳細が見られます。</p>
+                </div>
+                <!-- 検索フィルター -->
+                <div class="relative w-full sm:w-64">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i data-lucide="search" class="w-4 h-4 text-gray-400"></i>
+                    </div>
+                    <input type="text" id="search-members" oninput="handleSearch(this.value)" placeholder="名前やニックネームで検索..." class="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm">
+                </div>
+            </div>
+            <!-- カードグリッド (JSで動的生成) -->
+            <div id="members-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"></div>
+        </div>
+
+        <!-- ==============================
+             名簿管理画面 (表形式 / 管理者専用) (SCR05)
+        ============================== -->
+        <div id="page-admin" class="page-view hidden fade-in">
+            <div class="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">名簿管理 (役員専用)</h2>
+                    <p class="text-sm text-gray-500 mt-1">全メンバーの情報管理と権限設定を行います。</p>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                    <!-- 検索フィルター -->
+                    <div class="relative w-full sm:w-64">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i data-lucide="search" class="w-4 h-4 text-gray-400"></i>
+                        </div>
+                        <input type="text" id="search-admin" oninput="handleSearch(this.value)" placeholder="名前やニックネームで検索..." class="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm">
+                    </div>
+                    <button onclick="openRegisterModal()" class="flex-shrink-0 flex items-center justify-center gap-2 bg-primary hover:bg-primary_hover text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm">
+                        <i data-lucide="user-plus" class="w-4 h-4"></i>
+                        新規メンバー登録
+                    </button>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">氏名 / ニックネーム</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">メールアドレス</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">権限 (クリックで切替)</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                            </tr>
+                        </thead>
+                        <!-- テーブルボディ (JSで動的生成) -->
+                        <tbody id="admin-table-body" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==============================
+             マイページ画面 (SCR02, SCR03統合)
+        ============================== -->
+        <div id="page-mypage" class="page-view hidden fade-in">
+            <div class="max-w-2xl mx-auto">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900">マイページ</h2>
+                    <p class="text-sm text-gray-500 mt-1">ご自身のプロフィール情報の確認と編集ができます。</p>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sm:p-8">
+                    <!-- フォーム (JSで初期値セット) -->
+                    <form id="mypage-form" onsubmit="event.preventDefault(); updateMyProfile();" class="space-y-5">
+                        <!-- アバター表示領域 -->
+                        <div class="flex items-center gap-4 border-b border-gray-100 pb-6 mb-6">
+                            <div id="mypage-avatar" class="w-16 h-16 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-2xl font-bold"></div>
+                            <div>
+                                <div class="text-sm text-gray-500 mb-1">現在の権限</div>
+                                <span id="mypage-role-badge" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"></span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">氏名 <span class="text-red-500">*</span></label>
+                            <input type="text" id="mypage-name" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">ニックネーム</label>
+                            <input type="text" id="mypage-nickname" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">メールアドレス <span class="text-red-500">*</span></label>
+                            <input type="email" id="mypage-email" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">自己紹介</label>
+                            <textarea id="mypage-bio" rows="3" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">パスワード (変更する場合のみ入力)</label>
+                            <input type="password" placeholder="••••••••" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                        
+                        <div class="pt-4 flex justify-end">
+                            <button type="submit" class="bg-primary hover:bg-primary_hover text-white px-6 py-2 rounded-lg font-medium transition-colors">
+                                情報を更新する
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 退会エリア -->
+                <div class="mt-8 bg-red-50 rounded-xl border border-red-100 p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div>
+                        <h3 class="text-red-800 font-bold">町内会を退会する (アカウント削除)</h3>
+                        <p class="text-sm text-red-600 mt-1">すべてのアカウント情報が削除され、元に戻すことはできません。</p>
+                    </div>
+                    <button onclick="openWithdrawModal()" class="shrink-0 bg-white border border-red-300 text-red-600 hover:bg-red-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                        退会する
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ==============================
+         モーダルコンテナ (各種ポップアップ用)
+    ============================== -->
+    <div id="modal-container" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden items-center justify-center p-4 backdrop-blur-sm transition-opacity" onclick="handleModalBackdropClick(event)">
+        <!-- 動的にコンテンツが挿入されます -->
+        <div id="modal-content" class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden transform scale-95 transition-transform duration-200">
+        </div>
+    </div>
+
+
+    <!-- ==============================
+         JavaScript 実装
+    ============================== -->
+    <script>
+        /* ----------------------------------
+           1. 状態管理 (State) と ダミーデータ
+        ----------------------------------- */
+        let users = [
+            { id: '1001', name: '細谷 芽生', email: 'hosoya@example.com', role: 'admin', nickname: 'めい', bio: '町内会のIT担当役員です。システムに関する質問はお気軽にどうぞ！', password: 'password123' },
+            { id: '1002', name: '佐藤 花子', email: 'sato@example.com', role: 'user', nickname: 'はなこ', bio: '3丁目に住んでいます。お花を育てるのが好きです。よろしくお願いします。', password: 'password123' },
+            { id: '1003', name: '高橋 一郎', email: 'takahashi@example.com', role: 'user', nickname: 'いっちゃん', bio: '週末は近くの公園で少年野球のコーチをしています。', password: 'password123' },
+            { id: '1004', name: '鈴木 次郎', email: 'suzuki@example.com', role: 'user', nickname: 'ジロー', bio: '最近この町に引っ越してきました。美味しいランチのお店を探し中です。', password: 'password123' },
+            { id: '1005', name: '山田 太郎', email: 'yamada@example.com', role: 'admin', nickname: '会長', bio: '町内会長を務めております。皆さんが住みやすい町づくりを目指しています。', password: 'password123' }
+        ];
+
+        let currentUser = null;
+        let currentView = 'login'; // 'login', 'members', 'admin', 'mypage'
+        let searchQuery = ''; // 検索フィルター用の状態
+
+        /* ----------------------------------
+           2. ナビゲーションと初期化
+        ----------------------------------- */
+        function navigateTo(view) {
+            currentView = view;
+            
+            // 検索クエリのリセット
+            searchQuery = '';
+            const searchMembers = document.getElementById('search-members');
+            if (searchMembers) searchMembers.value = '';
+            const searchAdmin = document.getElementById('search-admin');
+            if (searchAdmin) searchAdmin.value = '';
+            
+            // 全画面非表示
+            document.querySelectorAll('.page-view').forEach(el => el.classList.add('hidden'));
+            // 対象画面表示
+            const pageEl = document.getElementById(`page-${view}`);
+            if(pageEl) pageEl.classList.remove('hidden');
+
+            // ログイン状態に応じたヘッダー表示
+            const header = document.getElementById('header');
+            if (view === 'login') {
+                header.classList.add('hidden');
+            } else {
+                header.classList.remove('hidden');
+                renderHeaderNav();
+            }
+
+            // 画面ごとのデータ描画
+            if (view === 'members') renderCardList();
+            if (view === 'admin') renderTableList();
+            if (view === 'mypage') renderMyPage();
+
+            // アイコン再描画
+            lucide.createIcons();
+            window.scrollTo(0, 0);
+        }
+
+        function loginAs(role) {
+            // テスト用に権限に応じたユーザーをセット
+            currentUser = users.find(u => u.role === role);
+            navigateTo('members'); // ログイン後は一覧へ
+        }
+
+        function logout() {
+            currentUser = null;
+            navigateTo('login');
+        }
+
+        /* ----------------------------------
+           3. 画面レンダリング関数
+        ----------------------------------- */
+        // ヘッダーナビゲーションの出し分け
+        function renderHeaderNav() {
+            const nav = document.getElementById('nav-menu');
+            let html = '';
+
+            const isActive = (view) => currentView === view ? 'text-primary border-b-2 border-primary font-medium' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50';
+            const baseClass = "px-3 py-2 rounded-t-lg sm:rounded-lg text-sm transition-colors flex items-center gap-1.5";
+
+            // 共通: メンバー一覧
+            html += `<button onclick="navigateTo('members')" class="${baseClass} ${isActive('members')}"><i data-lucide="layout-grid" class="w-4 h-4"></i><span class="hidden sm:inline">メンバー一覧</span></button>`;
+            
+            // 管理者のみ: 名簿管理
+            if (currentUser.role === 'admin') {
+                html += `<button onclick="navigateTo('admin')" class="${baseClass} ${isActive('admin')}"><i data-lucide="table" class="w-4 h-4"></i><span class="hidden sm:inline">名簿管理</span></button>`;
+            }
+            
+            // 共通: マイページとログアウト
+            html += `<button onclick="navigateTo('mypage')" class="${baseClass} ${isActive('mypage')}"><i data-lucide="user-circle" class="w-4 h-4"></i><span class="hidden sm:inline">マイページ</span></button>`;
+            
+            html += `<div class="w-px h-4 bg-gray-200 mx-1 sm:mx-2 hidden sm:block"></div>`; // セパレータ
+            
+            html += `<button onclick="logout()" class="${baseClass.replace('rounded-t-lg', '')} text-gray-500 hover:text-red-600 hover:bg-red-50"><i data-lucide="log-out" class="w-4 h-4"></i><span class="hidden sm:inline">ログアウト</span></button>`;
+
+            nav.innerHTML = html;
+        }
+
+        // 検索ハンドラー
+        function handleSearch(query) {
+            searchQuery = query.toLowerCase();
+            if (currentView === 'members') renderCardList();
+            if (currentView === 'admin') renderTableList();
+            lucide.createIcons();
+        }
+
+        // メンバー一覧 (カード形式)
+        function renderCardList() {
+            const grid = document.getElementById('members-grid');
+            
+            // フィルター処理
+            const filteredUsers = users.filter(u => 
+                u.name.toLowerCase().includes(searchQuery) || 
+                (u.nickname && u.nickname.toLowerCase().includes(searchQuery))
+            );
+
+            if (filteredUsers.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-12 text-gray-500">条件に一致するメンバーが見つかりませんでした。</div>`;
+                return;
+            }
+
+            grid.innerHTML = filteredUsers.map(u => `
+                <div onclick="openUserDetailModal('${u.id}')" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-blue-200 transition-all cursor-pointer group">
+                    <div class="flex flex-col items-center text-center">
+                        <div class="w-20 h-20 rounded-full bg-gradient-to-br from-blue-50 to-indigo-50 text-primary flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-105 transition-transform">
+                            ${u.name.charAt(0)}
+                        </div>
+                        <h3 class="font-bold text-lg text-gray-900 leading-tight">${u.name}</h3>
+                        <p class="text-sm text-gray-500 mt-1 mb-3">${u.nickname ? '@' + u.nickname : '&nbsp;'}</p>
+                        
+                        ${u.role === 'admin' 
+                            ? `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200 mb-3"><i data-lucide="shield-check" class="w-3 h-3 mr-1"></i>役員</span>` 
+                            : `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600 mb-3">メンバー</span>`
+                        }
+                        
+                        <p class="text-sm text-gray-600 line-clamp-2 mt-auto w-full">${u.bio || 'よろしくお願いします。'}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 名簿管理 (表形式)
+        function renderTableList() {
+            const tbody = document.getElementById('admin-table-body');
+            
+            // フィルター処理
+            const filteredUsers = users.filter(u => 
+                u.name.toLowerCase().includes(searchQuery) || 
+                (u.nickname && u.nickname.toLowerCase().includes(searchQuery))
+            );
+
+            if (filteredUsers.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-gray-500">条件に一致するメンバーが見つかりませんでした。</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filteredUsers.map(u => `
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">${u.id}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">${u.name}</div>
+                        <div class="text-sm text-gray-500">${u.nickname || '-'}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${u.email}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <!-- インライン権限切り替えボタン -->
+                        <button onclick="toggleRole('${u.id}')" class="inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium transition-colors ${u.role === 'admin' ? 'bg-red-50 text-red-700 hover:bg-red-100 border border-red-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200'}">
+                            ${u.role === 'admin' ? '<i data-lucide="shield" class="w-3 h-3 mr-1"></i>管理者' : '一般ユーザー'}
+                        </button>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button onclick="openEditUserModal('${u.id}')" class="text-primary hover:text-primary_hover bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded-md transition-colors mr-2">編集</button>
+                        <button onclick="openDeleteUserModal('${u.id}')" class="text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 px-3 py-1 rounded-md transition-colors ${u.id === currentUser.id ? 'opacity-50 cursor-not-allowed' : ''}" ${u.id === currentUser.id ? 'disabled title="自身は削除できません"' : ''}>削除</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // マイページの初期値セット
+        function renderMyPage() {
+            document.getElementById('mypage-avatar').innerText = currentUser.name.charAt(0);
+            
+            const badge = document.getElementById('mypage-role-badge');
+            if (currentUser.role === 'admin') {
+                badge.className = "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800";
+                badge.innerHTML = "役員 (管理者)";
+            } else {
+                badge.className = "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800";
+                badge.innerHTML = "一般メンバー";
+            }
+
+            document.getElementById('mypage-name').value = currentUser.name;
+            document.getElementById('mypage-nickname').value = currentUser.nickname || '';
+            document.getElementById('mypage-email').value = currentUser.email;
+            document.getElementById('mypage-bio').value = currentUser.bio || '';
+        }
+
+        function updateMyProfile() {
+            // モック: データを更新したフリをしてアラート
+            currentUser.name = document.getElementById('mypage-name').value;
+            currentUser.nickname = document.getElementById('mypage-nickname').value;
+            currentUser.email = document.getElementById('mypage-email').value;
+            currentUser.bio = document.getElementById('mypage-bio').value;
+            
+            // users配列側も更新
+            const index = users.findIndex(u => u.id === currentUser.id);
+            if(index !== -1) users[index] = currentUser;
+
+            alert('プロフィールを更新しました。');
+            renderHeaderNav(); // 名前が変わった場合などに対応
+        }
+
+        /* ----------------------------------
+           4. アクション機能 (管理者向け)
+        ----------------------------------- */
+        function toggleRole(userId) {
+            // 自分自身の権限は外せない安全装置
+            if (userId === currentUser.id) {
+                alert("自身から管理者権限を外すことはできません。");
+                return;
+            }
+            const user = users.find(u => u.id === userId);
+            if (user) {
+                user.role = user.role === 'admin' ? 'user' : 'admin';
+                renderTableList(); // テーブル再描画
+                lucide.createIcons();
+            }
+        }
+
+        // モック用の保存処理群
+        function saveNewUser(event) {
+            event.preventDefault();
+            const newId = (parseInt(users[users.length-1]?.id || '1000') + 1).toString();
+            const newUser = {
+                id: newId,
+                name: document.getElementById('reg-name').value,
+                email: document.getElementById('reg-email').value,
+                role: 'user', // 最新要件: 常に一般として登録
+                nickname: '',
+                bio: ''
+            };
+            users.push(newUser);
+            closeModal();
+            renderTableList();
+            lucide.createIcons();
+            alert(`${newUser.name} さんを登録しました。`);
+        }
+
+        function saveEditedUser(event, userId) {
+            event.preventDefault();
+            const user = users.find(u => u.id === userId);
+            if(user) {
+                user.name = document.getElementById('edit-name').value;
+                user.email = document.getElementById('edit-email').value;
+                user.nickname = document.getElementById('edit-nickname').value;
+                // パスワードはUI上のモックなので省略
+            }
+            closeModal();
+            renderTableList();
+            lucide.createIcons();
+        }
+
+        function executeDeleteUser(userId) {
+            users = users.filter(u => u.id !== userId);
+            closeModal();
+            renderTableList();
+            lucide.createIcons();
+        }
+
+        function executeWithdraw() {
+            // マイページからの退会
+            users = users.filter(u => u.id !== currentUser.id);
+            closeModal();
+            alert('退会処理が完了しました。ご利用ありがとうございました。');
+            logout();
+        }
+
+        /* ----------------------------------
+           5. モーダル管理 (ポップアップUI)
+        ----------------------------------- */
+        const modalContainer = document.getElementById('modal-container');
+        const modalContent = document.getElementById('modal-content');
+
+        function openModal(htmlContent) {
+            modalContent.innerHTML = htmlContent;
+            modalContent.classList.remove('scale-95', 'opacity-0');
+            modalContent.classList.add('scale-100', 'opacity-100');
+            modalContainer.classList.remove('hidden');
+            modalContainer.classList.add('flex');
+            document.body.classList.add('modal-open');
+            lucide.createIcons();
+        }
+
+        function closeModal() {
+            modalContent.classList.remove('scale-100', 'opacity-100');
+            modalContent.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modalContainer.classList.add('hidden');
+                modalContainer.classList.remove('flex');
+                document.body.classList.remove('modal-open');
+                modalContent.innerHTML = '';
+            }, 200); // tailwind transition duration
+        }
+
+        function handleModalBackdropClick(event) {
+            if (event.target === modalContainer) {
+                closeModal();
+            }
+        }
+
+        // モーダル: ユーザー詳細 (組織図から開く)
+        function openUserDetailModal(userId) {
+            const user = users.find(u => u.id === userId);
+            if(!user) return;
+
+            const html = `
+                <div class="p-6 relative">
+                    <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 bg-gray-50 rounded-full p-1"><i data-lucide="x" class="w-5 h-5"></i></button>
+                    <div class="flex flex-col items-center mt-4">
+                        <div class="w-24 h-24 rounded-full bg-gradient-to-br from-blue-50 to-indigo-50 text-primary flex items-center justify-center text-3xl font-bold mb-4 shadow-sm border border-blue-100">
+                            ${user.name.charAt(0)}
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900">${user.name}</h3>
+                        <p class="text-gray-500 mt-1">${user.nickname ? '@' + user.nickname : ''}</p>
+                        
+                        <div class="mt-3 mb-6">
+                            ${user.role === 'admin' 
+                                ? `<span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-amber-50 text-amber-700 border border-amber-200"><i data-lucide="shield-check" class="w-4 h-4 mr-1"></i>役員</span>` 
+                                : `<span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-600">町内会メンバー</span>`
+                            }
+                        </div>
+
+                        <div class="w-full bg-gray-50 rounded-xl p-4 text-left border border-gray-100">
+                            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">自己紹介</h4>
+                            <p class="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">${user.bio || 'よろしくお願いします。'}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            openModal(html);
+        }
+
+        // モーダル: 新規登録 (最新要件: 権限選択なし)
+        function openRegisterModal() {
+            const html = `
+                <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                    <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2"><i data-lucide="user-plus" class="w-5 h-5 text-primary"></i>新規メンバー登録</h3>
+                    <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+                </div>
+                <form onsubmit="saveNewUser(event)" class="p-6 space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">氏名 <span class="text-red-500">*</span></label>
+                        <input type="text" id="reg-name" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">メールアドレス <span class="text-red-500">*</span></label>
+                        <input type="email" id="reg-email" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">初期パスワード <span class="text-red-500">*</span></label>
+                        <input type="password" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    <div class="bg-blue-50 text-blue-800 text-xs p-3 rounded-lg flex items-start gap-2 mt-2">
+                        <i data-lucide="info" class="w-4 h-4 shrink-0 mt-0.5"></i>
+                        <p>登録時は自動的に「一般ユーザー」として登録されます。権限の変更は登録後に一覧画面から行ってください。</p>
+                    </div>
+                    <div class="pt-4 flex justify-end gap-2">
+                        <button type="button" onclick="closeModal()" class="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors">キャンセル</button>
+                        <button type="submit" class="px-4 py-2 bg-primary hover:bg-primary_hover text-white rounded-lg font-medium transition-colors">登録する</button>
+                    </div>
+                </form>
+            `;
+            openModal(html);
+        }
+
+        // モーダル: ユーザー編集 (最新要件: 権限選択なし)
+        function openEditUserModal(userId) {
+            const user = users.find(u => u.id === userId);
+            if(!user) return;
+
+            const html = `
+                <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                    <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2"><i data-lucide="edit-3" class="w-5 h-5 text-primary"></i>メンバー情報編集</h3>
+                    <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+                </div>
+                <form onsubmit="saveEditedUser(event, '${user.id}')" class="p-6 space-y-4">
+                    <div class="text-xs text-gray-500 font-mono mb-2">ID: ${user.id}</div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">氏名</label>
+                        <input type="text" id="edit-name" value="${user.name}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">ニックネーム</label>
+                        <input type="text" id="edit-nickname" value="${user.nickname || ''}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">メールアドレス</label>
+                        <input type="email" id="edit-email" value="${user.email}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">パスワード (変更時のみ)</label>
+                        <input type="password" placeholder="••••••••" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    <div class="pt-4 flex justify-end gap-2">
+                        <button type="button" onclick="closeModal()" class="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors">キャンセル</button>
+                        <button type="submit" class="px-4 py-2 bg-primary hover:bg-primary_hover text-white rounded-lg font-medium transition-colors">更新する</button>
+                    </div>
+                </form>
+            `;
+            openModal(html);
+        }
+
+        // モーダル: 削除確認 (管理者から)
+        function openDeleteUserModal(userId) {
+            const user = users.find(u => u.id === userId);
+            const html = `
+                <div class="p-6 text-center">
+                    <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="alert-triangle" class="w-8 h-8"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">ユーザーの削除確認</h3>
+                    <p class="text-gray-600 mb-6">「<span class="font-bold">${user.name}</span>」さんのデータを完全に削除しますか？この操作は取り消せません。</p>
+                    <div class="flex justify-center gap-3">
+                        <button onclick="closeModal()" class="px-5 py-2.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors w-full">キャンセル</button>
+                        <button onclick="executeDeleteUser('${userId}')" class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors w-full">削除する</button>
+                    </div>
+                </div>
+            `;
+            openModal(html);
+        }
+
+        // モーダル: 退会確認 (マイページから)
+        function openWithdrawModal() {
+            const html = `
+                <div class="p-6 text-center border-t-4 border-red-500">
+                    <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="user-x" class="w-8 h-8"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-red-800 mb-2">本当に退会しますか？</h3>
+                    <p class="text-gray-600 mb-6 text-sm text-left">
+                        退会すると、以下の情報が直ちに失われます。<br>
+                        ・プロフィール情報とこれまでの活動履歴<br>
+                        ・町内会コミュニティへのログイン権限<br><br>
+                        再度参加を希望される場合は、役員に連絡して新規登録を行う必要があります。
+                    </p>
+                    <div class="flex justify-center gap-3">
+                        <button onclick="closeModal()" class="px-5 py-2.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors w-full">キャンセル</button>
+                        <button onclick="executeWithdraw()" class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors w-full">はい、退会します</button>
+                    </div>
+                </div>
+            `;
+            openModal(html);
+        }
+
+        // 初期化 (アイコン描画)
+        lucide.createIcons();
+    </script>
+</body>
+</html>
