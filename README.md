@@ -14,7 +14,8 @@
 - npm 10.x 以上
 - Vite
 - Tailwind CSS
-- Axios
+- Axios // API通信用
+- react-router-dom URLを画面ごとにわかりやすく設定できる。
 
 
 ## 主な機能
