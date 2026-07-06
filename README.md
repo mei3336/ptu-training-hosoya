@@ -10,6 +10,12 @@
 - Ruby on Rails API
 - PostgreSQL
 - Docker
+- Node.js 22.x 推奨
+- npm 10.x 以上
+- Vite
+- Tailwind CSS
+- Axios
+
 
 ## 主な機能
 
@@ -84,3 +90,8 @@ PTU-TRAINING-HOSOYA/          # プロジェクトのルート
 - bcrypt: ユーザーのパスワードを守る、絶対に開けられない「最強の暗庫（金庫）」。
 - rotp: 管理者だけが持つ、30秒ごとに鍵穴が変わる「電子キーシリンダー」。
 - rack-cors: ReactとRailsの間を通す、セキュリティゲートの「通行許可証」。
+
+## ブラウザ検証
+- backend　http://localhost:3000/
+- frontend　http://localhost:5173/
+- 両方(nginx:alpineこれ経由)　http://localhost
