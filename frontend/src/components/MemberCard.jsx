@@ -1,4 +1,4 @@
-import "./MemberCard.css";
+import "../styles/member-card-base.css";
 import Badge from "./badge";
 import Avatar from "./Avatar";
 

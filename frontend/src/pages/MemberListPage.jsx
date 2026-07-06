@@ -1,6 +1,10 @@
+import { useState } from "react";
 import MemberCard from "../components/MemberCard";
+import UserDetailModal from "../components/UserDetailModal";
 
 function MemberListPage() {
+  const [selectedMember, setSelectedMember] = useState(null);
+
   const members = [
     {
       id: 1,
@@ -32,10 +36,17 @@ function MemberListPage() {
           <MemberCard
             key={member.id}
             member={member}
-            onClick={() => console.log(member)}
+            onClick={setSelectedMember}
           />
         ))}
       </div>
+
+      {/*モーダル*/}
+       <UserDetailModal
+        isOpen={!!selectedMember}
+        onClose={() => setSelectedMember(null)}
+        member={selectedMember}
+      />
 
     </div>
   );
