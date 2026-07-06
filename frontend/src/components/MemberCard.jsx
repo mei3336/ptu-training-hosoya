@@ -1,10 +1,6 @@
 import "./MemberCard.css";
 import Badge from "./badge";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
+import Avatar from "./Avatar";
 
 function MemberCard({ member, onClick }) {
   return (
@@ -12,13 +8,11 @@ function MemberCard({ member, onClick }) {
       className="member-card"
       onClick={() => onClick?.(member)}
     >
-      <Avatar className="member-avatar">
-        <AvatarImage src={member.avatarUrl} />
-
-        <AvatarFallback>
-          {member.name?.charAt(0)}
-        </AvatarFallback>
-      </Avatar>
+    <div className="member-top">
+      <Avatar className="member-avatar"
+        src={member.avatarUrl}
+        fallback={member.name.charAt(0)}
+      />
 
       <div className="member-content">
         <h3 className="member-name">
@@ -29,19 +23,15 @@ function MemberCard({ member, onClick }) {
           @{member.nickname}
         </p>
 
-        <Badge
-          className={
-            member.role === "admin"
-              ? "badge-admin"
-              : "badge-member"
-          }
-        >
+        <Badge role={member.role}>
           {member.roleLabel}
         </Badge>
-
-        <p className="member-bio">
-          {member.bio}
-        </p>
+      </div>
+    </div>
+    <div className="member-bio-container border-t pt-3 mt-1">
+      <p className="member-bio">
+        {member.bio}
+      </p>
       </div>
     </div>
   );

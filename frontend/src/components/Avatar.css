@@ -1,0 +1,18 @@
+.avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 1px solid #0c2219;
+  background: #f3fffa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  overflow: hidden;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

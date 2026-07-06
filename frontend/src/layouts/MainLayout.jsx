@@ -5,8 +5,8 @@ function MainLayout({ children }) {
     <div className="layout">
       <Header />
 
-      <main className="main-content">
-        {children}
+      <main className="main-content main-container">
+        {children} 
       </main>
     </div>
   );

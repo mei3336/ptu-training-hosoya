@@ -1,6 +1,8 @@
 .member-card {
-  width: 400px;
+  width: 350px;
   display: flex;
+  flex-direction: column; /* ★必須：アバター上部と自己紹介下部を「縦並び」にする */
+  align-items: center;
   gap: 16px;
 
   padding: 16px;
@@ -16,6 +18,21 @@
 
 .member-card:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.member-top {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.member-bio-container {
+  margin-top: 16px;
+  text-align: left;
+  width: 90%;
+  margin: auto;
 }
 
 .member-avatar {
