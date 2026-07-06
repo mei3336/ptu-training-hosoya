@@ -1,0 +1,10 @@
+
+ja:
+  activerecord:
+    attributes:
+      user:
+        name: "氏名"
+        email: "メールアドレス"
+        password: "パスワード"
+        nickname: "ニックネーム"
+        bio: "自己紹介"
