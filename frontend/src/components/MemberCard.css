@@ -1,0 +1,49 @@
+.member-card {
+  width: 400px;
+  display: flex;
+  gap: 16px;
+
+  padding: 16px;
+
+  border: 1px solid #d9d9d9;
+  border-radius: 16px;
+
+  background: #ffffff;
+
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.member-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.member-avatar {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+}
+
+.member-content {
+  flex: 1;
+  text-align: left;
+}
+
+.member-name {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.member-nickname {
+  margin: 2px 0 8px;
+  color: #666;
+  font-size: 14px;
+}
+
+.member-bio {
+  margin-top: 12px;
+  color: #444;
+  font-size: 14px;
+  line-height: 1.5;
+}
