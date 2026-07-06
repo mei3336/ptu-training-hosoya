@@ -1,7 +1,8 @@
 function Header() {
   return (
-    <header>
-      <h1>ヘッダー</h1>
+    
+    <header className="header">
+     Header
     </header>
   );
 }

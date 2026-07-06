@@ -2,15 +2,20 @@
 
 .layout {
   min-height: 100vh;
+  background-color: #f5f5f5; /* レイアウト全体 */
 }
 
-.layout-body {
-  display: flex;
+.header {
+  height: 80px;
+  width: 100%;
+  background-color: #5789e7; /* 青紫 */
+  color: white;
+  padding: 16px;
 }
-
-
 
 .main-content {
-  flex: 1;
-  padding: 24px;
+  background-color: #ffffff; /* 白 */
+  border: 2px solid #ddd;
+  padding: 20px;
+  margin: 20px;
 }

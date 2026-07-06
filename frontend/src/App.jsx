@@ -7,8 +7,7 @@ import UserEditPage from "./pages/UserEditPage";
 import UserManagementPage from "./pages/UserManagementPage";
  
 import MainLayout from "./layouts/MainLayout";
-import AuthLayout from "./layouts/AuthLayout";
-
+import "./App.css";
  
 function App() {
   return (
@@ -18,9 +17,9 @@ function App() {
         <Route
           path="/"
           element={
-            <AuthLayout>
+            <MainLayout>
               <LoginPage />
-            </AuthLayout>
+            </MainLayout>
           }
         />
  
