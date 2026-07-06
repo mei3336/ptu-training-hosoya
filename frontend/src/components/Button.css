@@ -1,0 +1,40 @@
+.btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: 0.2s;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background-color: #3e8be2;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #7888b4;
+}
+
+.btn-secondary {
+  background-color: #57b64b;
+  color: #ffffff;
+}
+
+.btn-secondary:hover {
+  background-color: #197266;
+}
+
+.btn-danger {
+  background-color: #df4141;
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: #631515;
+}
+
+.btn-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
