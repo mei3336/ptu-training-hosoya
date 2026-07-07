@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Button from "../components/Button";
+import { useNavigate } from "react-router-dom";
 
 const initialUsers = [
   {
@@ -40,6 +41,7 @@ const initialUsers = [
 ];
 
 export default function UserManagementPage() {
+  const navigate = useNavigate();
   const [users, setUsers] = useState(initialUsers);
 
   const toggleRole = (id) => {
@@ -72,7 +74,7 @@ export default function UserManagementPage() {
 
           <Button
             variant="primary"
-            onClick={() => navigate("/users/new")}
+            onClick={() => navigate("/users/create")}
           >
             ＋ 新規メンバー登録
           </Button>

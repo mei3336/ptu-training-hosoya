@@ -5,7 +5,7 @@ import MemberListPage from "./pages/MemberListPage";
 import UserCreatePage from "./pages/UserCreatePage";
 import UserEditPage from "./pages/UserEditPage";
 import UserManagementPage from "./pages/UserManagementPage";
- 
+import MyPage from "./pages/MyPage"; 
 import MainLayout from "./layouts/MainLayout";
 import "./App.css";
 
@@ -54,13 +54,23 @@ function App() {
         />
  
         <Route
-          path="/users/edit/:id"
+          path="/users/:id/edit"
           element={
             <MainLayout>
               <UserEditPage />
             </MainLayout>
           }
         />
+        
+        <Route
+          path="/mypage"
+          element={
+            <MainLayout>
+              <MyPage/>
+            </MainLayout>
+          }
+        />
+
       </Routes>
     </BrowserRouter>
   );

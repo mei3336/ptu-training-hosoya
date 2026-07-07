@@ -170,3 +170,46 @@ p {
 .user-email {
   color: #374151;
 }
+
+
+/* =========================
+   マイページ画面
+========================= */
+/* MyPage.css */
+
+/* MyPage専用 */
+
+.mypage-member-card .member-card {
+  width: 100%;
+  max-width: 700px;
+  cursor: default;
+}
+
+/* ホバー無効 */
+.mypage-member-card .member-card:hover {
+  transform: none;
+  box-shadow: inherit;
+}
+
+/* アイコン大きく */
+.mypage-member-card .member-avatar {
+  width: 96px;
+  height: 96px;
+}
+
+/* 名前大きく */
+.mypage-member-card .member-name {
+  font-size: 1.75rem;
+}
+
+/* ニックネーム */
+.mypage-member-card .member-nickname {
+  font-size: 1rem;
+}
+
+/* 自己紹介 */
+.mypage-member-card .member-bio {
+  white-space: pre-wrap;
+  line-height: 1.8;
+  font-size: 1rem;
+}
