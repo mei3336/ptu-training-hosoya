@@ -1,0 +1,30 @@
+/* 画面全体のオーバーレイ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 背景の黒幕 */
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* モーダル本体（台座） */
+.modal-container {
+  position: relative;
+  background: #ffffff;
+  border-radius: 12px;
+
+  padding: 24px;
+  width: 100%;
+  max-width: 420px;
+
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}

@@ -14,7 +14,9 @@
 - npm 10.x 以上
 - Vite
 - Tailwind CSS
-- Axios
+- Axios // API通信用
+- react-router-dom URLを画面ごとにわかりやすく設定できる。
+- Path Alias // shadcn/uiライブラリのアバター画像関連をインストールする際に　importパスを＠/から始める必要があったためインストール
 
 
 ## 主な機能
