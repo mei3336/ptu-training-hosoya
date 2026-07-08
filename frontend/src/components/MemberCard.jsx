@@ -3,6 +3,12 @@ import Badge from "./badge";
 import Avatar from "./Avatar";
 
 function MemberCard({ member, onClick }) {
+  
+  const ROLE_MAP = {
+    admin: '管理者',
+    member: '一般メンバー'
+  };
+
   return (
     <div
       className="member-card"
@@ -24,7 +30,7 @@ function MemberCard({ member, onClick }) {
         </p>
 
         <Badge role={member.role}>
-          {member.roleLabel}
+          {ROLE_MAP[member.role] || '未設定'}
         </Badge>
       </div>
     </div>

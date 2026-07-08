@@ -1,48 +1,35 @@
-import React, { useState } from "react";
+import React, { useEffect,useState } from "react";
 import Button from "../components/Button";
 import { useNavigate } from "react-router-dom";
 
-const initialUsers = [
-  {
-    id: "1001",
-    name: "細谷 芽生",
-    nickname: "めい",
-    email: "hosoya@example.com",
-    role: "admin",
-  },
-  {
-    id: "1002",
-    name: "佐藤 花子",
-    nickname: "はなこ",
-    email: "sato@example.com",
-    role: "user",
-  },
-  {
-    id: "1003",
-    name: "高橋 一郎",
-    nickname: "いっちゃん",
-    email: "takahashi@example.com",
-    role: "user",
-  },
-  {
-    id: "1004",
-    name: "鈴木 次郎",
-    nickname: "ジロー",
-    email: "suzuki@example.com",
-    role: "user",
-  },
-  {
-    id: "1005",
-    name: "山田 太郎",
-    nickname: "会長",
-    email: "yamada@example.com",
-    role: "admin",
-  },
-];
-
 export default function UserManagementPage() {
   const navigate = useNavigate();
-  const [users, setUsers] = useState(initialUsers);
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+    fetch('/api/v1/users') // プロキシ設定が効いていればこれでOK
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`サーバーからの応答がありません: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then(data => {
+        console.log("取得データ:", data); // これがブラウザのコンソールに出るか確認
+        const formattedMembers = data.map(user => ({
+          id: user.user_id,             // Railsの user_id を id に統一
+          name: user.name,
+          email: user.email,
+          role: user.role,              // "admin" や "member" という文字列
+          // ここで役割に応じたラベルを生成する
+          roleLabel: user.role === 'admin' ? '管理者' : 'メンバー'
+        }));
+        setUsers(formattedMembers);
+      })
+      .catch(err => {
+        console.error("データ取得エラー:", err);
+      });
+  }, []);
 
   const toggleRole = (id) => {
     setUsers((prev) =>
@@ -50,11 +37,16 @@ export default function UserManagementPage() {
         user.id === id
           ? {
               ...user,
-              role: user.role === "admin" ? "user" : "admin",
+              role: user.role === "admin" ? "member" : "admin",
             }
           : user
       )
     );
+  };
+
+  const deleteUser = (id) => {
+    // 実際の実装はここに追加
+    console.log("削除対象:", id);
   };
 
   return (

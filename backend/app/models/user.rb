@@ -38,8 +38,8 @@ class User < ApplicationRecord
             format: {
               with: /\A(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+\z/,
               message: "は英大文字・英小文字・数字をそれぞれ1文字以上含めてください。"
-            }
-            allow_nil: true  // パスワードが空の場合はバリデーションをスキップする. マイページ編集時のパスワード送信は任意設計。
+            },
+            allow_nil: true  #パスワードが空の場合はバリデーションをスキップする. マイページ編集時のパスワード送信は任意設計。
 
   validates :nickname,
             length: {
@@ -70,4 +70,5 @@ class User < ApplicationRecord
       errors.add(:password, "はメールアドレスと同じものは設定できません。")
     end
   end
+  
 end

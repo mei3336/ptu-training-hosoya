@@ -9,12 +9,14 @@ function UserCreatePage() {
   
   const handleSubmit = async (formData) => {
     try {
-      const result = await createUser(formData);
+      await createUser(formData);
+      alert("メンバー登録が完了しました！");
 
       console.log("登録成功", result);
 
     } catch (error) {
-      console.error(error);
+      console.error("登録エラー:",error);
+      alert("登録に失敗しました。入力内容を確認してください。");
     }
   };
 
