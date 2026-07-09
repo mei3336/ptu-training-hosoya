@@ -15,9 +15,10 @@ function MemberCard({ member, onClick }) {
       onClick={() => onClick?.(member)}
     >
     <div className="member-top">
-      <Avatar className="member-avatar"
-        src={member.avatarUrl}
-        fallback={member.name.charAt(0)}
+      <Avatar
+        className="member-avatar"
+          src={member.icon_image_url}
+          fallback={member.name.charAt(0)}
       />
 
       <div className="member-content">

@@ -72,9 +72,6 @@ Rails.application.configure do
   # config.generators.apply_rubocop_autocorrect_after_generate!
 
 
-  # リクエスト元のホストを許可リストに追加
-  config.hosts << "backend"
-  config.hosts << "backend:3000"
-  config.hosts << "localhost"
-  config.hosts << "127.0.0.1"
+  # リクエスト元のホストを全面許可（開発時のみ推奨：本番環境では非推奨）
+  config.hosts.clear
 end

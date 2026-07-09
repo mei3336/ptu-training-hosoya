@@ -4,7 +4,7 @@ class User < ApplicationRecord
         member: 2
   }
 
-
+  has_one_attached :icon_image
   has_secure_password
 
   validates :name,
@@ -54,10 +54,7 @@ class User < ApplicationRecord
               message: "は200文字以内で入力してください。"
             },
             allow_blank: true
-  
-  validates :icon_image,
-            length: { maximum: 255 }
-
+            
 
   validate :password_not_same_as_email
 
@@ -70,5 +67,4 @@ class User < ApplicationRecord
       errors.add(:password, "はメールアドレスと同じものは設定できません。")
     end
   end
-  
 end

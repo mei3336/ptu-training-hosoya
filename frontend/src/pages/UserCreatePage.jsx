@@ -1,18 +1,21 @@
 import React from "react";
 import UserForm from "../components/UserForm";
 import { createUser } from "../services/userService";
+import { useNavigate } from "react-router-dom";
 //import { useMembers } from "../components/hooks/useMembers";
 
 
 function UserCreatePage() {
   //const { createUser } = useMembers();
-  
+  const navigate = useNavigate();
+
   const handleSubmit = async (formData) => {
+    console.log("ページの親の中", formData);
+    console.log(formData.icon_image);
     try {
       await createUser(formData);
       alert("メンバー登録が完了しました！");
-
-      console.log("登録成功", result);
+      navigate("/users");
 
     } catch (error) {
       console.error("登録エラー:",error);
