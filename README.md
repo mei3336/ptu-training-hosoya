@@ -92,6 +92,7 @@ PTU-TRAINING-HOSOYA/          # プロジェクトのルート
 - bcrypt: ユーザーのパスワードを守る、絶対に開けられない「最強の暗庫（金庫）」。
 - rotp: 管理者だけが持つ、30秒ごとに鍵穴が変わる「電子キーシリンダー」。
 - rack-cors: ReactとRailsの間を通す、セキュリティゲートの「通行許可証」。
+- gem "jwt" JWT認証用のファイル
 
 ## ブラウザ検証
 - backend　http://localhost:3000/

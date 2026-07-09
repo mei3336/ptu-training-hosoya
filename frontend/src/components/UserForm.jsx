@@ -14,6 +14,20 @@ function UserForm({ mode = "create", initialData = {}, onSubmit }) {
     icon_image: null,
   });
 
+  React.useEffect(() => {
+    if (!initialData) return;
+      
+      setFormData(prev => ({
+        ...prev,
+        name: initialData.name || "",
+        nickname: initialData.nickname || "",
+        password:initialData.password || "",
+        email: initialData.email || "",
+        bio: initialData.bio || "",
+        role: initialData.role || "member",
+      }));
+    }, [initialData]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -51,7 +65,7 @@ function UserForm({ mode = "create", initialData = {}, onSubmit }) {
 
       
       <Input
-        label="初期パスワード *"
+        label="パスワード *"
         type="password"
         name="password"
         value={formData.password}
