@@ -1,10 +1,20 @@
 import React from "react";
 import Button from "@/components/Button";
 import { useNavigate } from "react-router-dom";
+import { logout } from "@/services/authService";
 
 function Header() {
   const navigate = useNavigate();
-
+  const handleLogout = async () => {
+    try {
+      await logout();
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+      navigate("/");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
   return (
     
     <header className="header">
@@ -16,7 +26,7 @@ function Header() {
           <a href="/users" className="header-link">名簿管理（管理者専用）</a>
         </nav>
         <Button
-          onClick={() => navigate("/")}
+          onClick={handleLogout}
         >
           ログアウト
         </Button>
