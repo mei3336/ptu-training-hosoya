@@ -1,32 +1,29 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import MemberCard from "../components/MemberCard";
 import UserDetailModal from "../components/UserDetailModal";
 
 function MemberListPage() {
+  const [members, setMembers] = useState([]);
   const [selectedMember, setSelectedMember] = useState(null);
 
-  const members = [
-    {
-      id: 1,
-      name: "田中 一郎",
-      nickname: "いっちゃん",
-      role: "admin",
-      roleLabel: "管理者",
+  useEffect(() => {
+    // バックエンドのAPIURLを指定（Docker環境なら /api/users など）
+    fetch('/api/v1/users') // プロキシ設定が効いていればこれでOK
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`サーバーからの応答がありません: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then(data => {
+        console.log("取得データ:", data); // これがブラウザのコンソールに出るか確認
+        setMembers(data);
+      })
+      .catch(err => {
+        console.error("データ取得エラー:", err);
+      });
+  }, []);
 
-      bio: "町内会の清掃活動や防災訓練によく参加しています。地域のみなさんと交流するのが楽しみです。",
-      avatarUrl: "",
-    },
-    {
-      id: 2,
-      name: "鈴木 恵子",
-      nickname: "けいこさん",
-      role: "member",
-      roleLabel: "メンバー",
-      bio: "季節のイベントや夏祭りのお手伝いをしています。気軽に声をかけてください。",
-      avatarUrl: "",
-    },
-  ];
-  
   return (
     <div>
       <h1>メンバー一覧</h1>

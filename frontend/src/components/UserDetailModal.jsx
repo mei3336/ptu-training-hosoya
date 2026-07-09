@@ -5,6 +5,12 @@ import Button from "./Button";
 import "../styles/member-card-base.css";
 
 export default function UserDetailModal({ isOpen, onClose, member }) {
+  
+  const ROLE_MAP = {
+    admin: '管理者',
+    member: '一般メンバー'
+  };
+
   if (!member) return null;
 
   return (
@@ -13,14 +19,16 @@ export default function UserDetailModal({ isOpen, onClose, member }) {
         <div className="member-top">
           <Avatar
             className="member-avatar"
-            src={member.avatarUrl}
+            src={member.icon_image_url}
             fallback={member.name.charAt(0)}
           />
 
           <div className="member-content">
             <h3 className="member-name">{member.name}</h3>
             <p className="member-nickname">@{member.nickname}</p>
-            <Badge role={member.role}>{member.roleLabel}</Badge>
+            <Badge role={member.role}>
+                {ROLE_MAP[member.role] || '未設定'}
+            </Badge>
           </div>
         </div>
 

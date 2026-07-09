@@ -3,6 +3,7 @@ import Button from "./Button";
 import React from "react";
 
 function UserForm({ mode = "create", initialData = {}, onSubmit }) {
+
   const [formData, setFormData] = React.useState({
     name: initialData.name || "",
     nickname: initialData.nickname || "",
@@ -10,7 +11,7 @@ function UserForm({ mode = "create", initialData = {}, onSubmit }) {
     bio: initialData.bio || "",
     password: "",
     role: initialData.role || "member",
-    iconImage: null,
+    icon_image: null,
   });
 
   const handleChange = (e) => {
@@ -25,7 +26,7 @@ function UserForm({ mode = "create", initialData = {}, onSubmit }) {
   const handleFileChange = (e) => {
     setFormData((prev) => ({
       ...prev,
-      iconImage: e.target.files[0],
+      icon_image: e.target.files[0],
     }));
   };
 
@@ -34,6 +35,7 @@ function UserForm({ mode = "create", initialData = {}, onSubmit }) {
     e.preventDefault();
 
     console.log(formData);
+    onSubmit(formData);
   };
 
 
@@ -80,7 +82,7 @@ function UserForm({ mode = "create", initialData = {}, onSubmit }) {
       <Input
         label="アイコン画像"
         type="file"
-        name="iconImage"
+        name="icon_image"
         accept="image/*"
         onChange={handleFileChange}
       />

@@ -3,15 +3,22 @@ import Badge from "./badge";
 import Avatar from "./Avatar";
 
 function MemberCard({ member, onClick }) {
+  
+  const ROLE_MAP = {
+    admin: '管理者',
+    member: '一般メンバー'
+  };
+
   return (
     <div
       className="member-card"
       onClick={() => onClick?.(member)}
     >
     <div className="member-top">
-      <Avatar className="member-avatar"
-        src={member.avatarUrl}
-        fallback={member.name.charAt(0)}
+      <Avatar
+        className="member-avatar"
+          src={member.icon_image_url}
+          fallback={member.name.charAt(0)}
       />
 
       <div className="member-content">
@@ -24,7 +31,7 @@ function MemberCard({ member, onClick }) {
         </p>
 
         <Badge role={member.role}>
-          {member.roleLabel}
+          {ROLE_MAP[member.role] || '未設定'}
         </Badge>
       </div>
     </div>

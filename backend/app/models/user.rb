@@ -4,7 +4,7 @@ class User < ApplicationRecord
         member: 2
   }
 
-
+  has_one_attached :icon_image
   has_secure_password
 
   validates :name,
@@ -38,8 +38,8 @@ class User < ApplicationRecord
             format: {
               with: /\A(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+\z/,
               message: "は英大文字・英小文字・数字をそれぞれ1文字以上含めてください。"
-            }
-            allow_nil: true  // パスワードが空の場合はバリデーションをスキップする. マイページ編集時のパスワード送信は任意設計。
+            },
+            allow_nil: true  #パスワードが空の場合はバリデーションをスキップする. マイページ編集時のパスワード送信は任意設計。
 
   validates :nickname,
             length: {
@@ -54,10 +54,7 @@ class User < ApplicationRecord
               message: "は200文字以内で入力してください。"
             },
             allow_blank: true
-  
-  validates :icon_image,
-            length: { maximum: 255 }
-
+            
 
   validate :password_not_same_as_email
 
