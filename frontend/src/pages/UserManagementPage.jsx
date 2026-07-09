@@ -1,10 +1,13 @@
 import React, { useEffect,useState } from "react";
 import Button from "../components/Button";
 import { useNavigate } from "react-router-dom";
+import UserDeleteModal from "@/components/UserDelateModal";
+
 
 export default function UserManagementPage() {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
+  const [selectedUsers, setSelectedUsers] = useState(null);
 
   useEffect(() => {
     fetch('/api/v1/users') // プロキシ設定が効いていればこれでOK
@@ -17,7 +20,7 @@ export default function UserManagementPage() {
       .then(data => {
         console.log("取得データ:", data); // これがブラウザのコンソールに出るか確認
         const formattedMembers = data.map(user => ({
-          id: user.user_id,             // Railsの user_id を id に統一
+          id: user.id,             // Railsの user_id を id に統一
           name: user.name,
           email: user.email,
           role: user.role,              // "admin" や "member" という文字列
@@ -44,9 +47,31 @@ export default function UserManagementPage() {
     );
   };
 
-  const deleteUser = (id) => {
-    // 実際の実装はここに追加
-    console.log("削除対象:", id);
+  const handleDelete = async () => {
+    if (!selectedUsers) return;
+
+    try {
+      const res = await fetch(
+        `/api/v1/users/${selectedUsers.id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error("削除に失敗しました");
+      }
+
+      setUsers((prev) =>
+        prev.filter(
+          (user) => user.id !== selectedUsers.id
+        )
+      );
+
+      setSelectedUsers(null);
+    } catch (error) {
+      console.error("削除エラー:", error);
+    }
   };
 
   return (
@@ -136,7 +161,8 @@ export default function UserManagementPage() {
                   <td>
                     <div className="flex gap-2 justify-end">
                       <Button
-                        onClick={() => navigate(`/users/${user.id}/edit`)}
+                        onClick={() =>{
+                          navigate(`/users/${user.id}/edit`)}}
                       >
                         編集
                       </Button>
@@ -144,7 +170,7 @@ export default function UserManagementPage() {
 
                       <Button
                         variant="danger"
-                        onClick={() => deleteUser(user.id)}
+                        onClick={() => setSelectedUsers(user)}
                       >
                         削除
                       </Button>
@@ -156,6 +182,14 @@ export default function UserManagementPage() {
           </table>
         </div>
       </div>
+
+      {/*モーダル*/}
+      <UserDeleteModal
+        isOpen={!!selectedUsers}
+        onClose={() => setSelectedUsers(null)}
+        user={selectedUsers}
+        onDelete={handleDelete}
+      />
     </div>
   );
 }
