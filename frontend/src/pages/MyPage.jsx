@@ -1,23 +1,23 @@
 import Button from "@/components/Button";
 import MemberCard from "@/components/MemberCard";
 import { useNavigate } from "react-router-dom";
+import { getCurrentUser } from "@/services/authService";
+import { useEffect, useState } from "react";
+
 
 function MyPage() {
 // 仮のユーザーデータ 本番は　MyPage(user) {
 
   const navigate = useNavigate();
-
+  const [user, setUser] = useState(null);
   
-  const user = {
-    id: 1,
-    name: "佐藤 花子",
-    nickname: "はなこ",
-    email: "sato@example.com",
-    bio: "3丁目に住んでいます。お花を育てるのが好きです。よろしくお願いします。",
-    role: "member",
-    roleLabel: "一般メンバー",
-    avatarUrl: "",
-  };
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      const data = await getCurrentUser();
+      setUser(data);
+    };
+      fetchCurrentUser();
+    }, []);
 
 
   if (!user) {

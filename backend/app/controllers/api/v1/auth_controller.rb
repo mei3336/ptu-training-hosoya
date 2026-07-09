@@ -1,6 +1,8 @@
 # app/controllers/api/v1/auth_controller.rb
 
 class Api::V1::AuthController < ApplicationController
+  before_action :authenticate_user!, only: [:me]
+
   def login
     user = User.find_by(email: params[:email])
 
@@ -20,6 +22,8 @@ class Api::V1::AuthController < ApplicationController
         secure: Rails.env.production?,
         same_site: :lax
       }
+      Rails.logger.info "COOKIE=#{cookies[:jwt]}"
+      Rails.logger.info response.headers.to_h.inspect
 
       render json: {
         result: "success",
@@ -46,24 +50,9 @@ class Api::V1::AuthController < ApplicationController
   end
 
   def me
-    if session[:user_id].present?
-      user = User.find_by(id: session[:user_id])
-
-      if user
-        render json: {
-          authenticated: true,
-          user: user
-        }
-      else
-        render json: {
-          authenticated: false
-        }, status: :unauthorized
-      end
-    else
-      render json: {
-        authenticated: false
-      }, status: :unauthorized
-    end
+    render json: {
+      id: current_user.id,
+      email: current_user.email}
   end
 
 end

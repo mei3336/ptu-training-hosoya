@@ -5,6 +5,7 @@ class ApplicationController < ActionController::API
 
   def current_user
     token = cookies[:jwt]
+    Rails.logger.info "JWT Cookie: #{token.inspect}"
     return nil unless token
 
     decoded = JWT.decode(
@@ -18,6 +19,7 @@ class ApplicationController < ActionController::API
 
     @current_user ||= User.find_by(id: payload["user_id"])
   rescue JWT::DecodeError, JWT::ExpiredSignature
+    Rails.logger.info "JWT Error: #{e.message}"
     nil
   end
 
