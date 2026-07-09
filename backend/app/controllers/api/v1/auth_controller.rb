@@ -51,8 +51,8 @@ class Api::V1::AuthController < ApplicationController
 
   def me
     render json: {
-      id: current_user.id,
-      email: current_user.email}
+      user: current_user 
+    }
   end
 
 end

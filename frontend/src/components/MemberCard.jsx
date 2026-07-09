@@ -15,6 +15,7 @@ function MemberCard({ member, onClick }) {
       onClick={() => onClick?.(member)}
     >
     <div className="member-top">
+      console.log(user);
       <Avatar
         className="member-avatar"
           src={member.icon_image_url}

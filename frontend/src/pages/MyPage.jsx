@@ -12,12 +12,21 @@ function MyPage() {
   const [user, setUser] = useState(null);
   
   useEffect(() => {
+    console.log("useEffect実行");
+
     const fetchCurrentUser = async () => {
+      console.log("API呼び出し前");
+
       const data = await getCurrentUser();
+
+      console.log("取得成功", data);
+
       setUser(data);
     };
-      fetchCurrentUser();
-    }, []);
+
+    fetchCurrentUser();
+  }, []);
+
 
 
   if (!user) {

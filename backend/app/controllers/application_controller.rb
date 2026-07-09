@@ -17,7 +17,7 @@ class ApplicationController < ActionController::API
 
     payload = decoded.first
 
-    @current_user ||= User.find_by(id: payload["user_id"])
+    @current_user ||= User.find_by(user_id: payload["user_id"])
   rescue JWT::DecodeError, JWT::ExpiredSignature
     Rails.logger.info "JWT Error: #{e.message}"
     nil
