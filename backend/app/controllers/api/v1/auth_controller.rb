@@ -51,8 +51,10 @@ class Api::V1::AuthController < ApplicationController
 
   def me
     render json: {
-      user: current_user 
+      user: crrent_user,
+      icon_image_url: current_user.icon_image.attached? ?
+      url_for(current_user.icon_image) : nil
     }
-  end
 
+  end
 end
