@@ -2,16 +2,27 @@ import Button from "../components/Button";
 import Input from "../components/Input";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { login } from "../services/authService";
+import { login as loginApi } from "../services/authService";
+import { useAuth } from "../contexts/AuthContext";
 
 function LoginPage() {
+  const { login } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
-    const response = await login(email, password);
+    const response = await loginApi(email, password);
+
     if (response.result === "success") {
+      console.log("navigate前");
+
+      login({
+        id: response.user.id,
+        role: response.user.role,
+        name: response.user.name,
+      });
+
       navigate("/members");
 
     } else {alert("メールアドレスまたはパスワードが違います");

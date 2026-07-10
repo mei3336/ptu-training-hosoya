@@ -3,12 +3,12 @@ import MemberCard from "@/components/MemberCard";
 import { useNavigate } from "react-router-dom";
 import { getCurrentUser } from "@/services/authService";
 import { useEffect, useState } from "react";
-
+import { useAuth } from "../contexts/AuthContext";
 
 function MyPage() {
-
+  const { user } = useAuth();
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
   
   useEffect(() => {
     console.log("useEffect実行");
@@ -20,7 +20,7 @@ function MyPage() {
 
       console.log("取得成功", data);
 
-      setUser({
+      setProfile({
         ...data.user,
         icon_image_url: data.icon_image_url,
     });
@@ -29,10 +29,14 @@ function MyPage() {
 
 
 
-  if (!user) {
+  if (!profile) {
     return <div>読み込み中...</div>;
   }
 
+  if (!user) {
+    return  navigate("/");
+  }
+ 
   return (
     <div className="max-w-4xl mx-auto">
       <h1 className="text-3xl font-bold">
@@ -45,7 +49,7 @@ function MyPage() {
 
         {/* メンバーカード流用 */}
         <div className="mypage-member-card">
-          <MemberCard member={user}
+          <MemberCard member={profile}
           />
         </div>
 

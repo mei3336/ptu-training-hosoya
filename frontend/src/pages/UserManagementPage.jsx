@@ -2,10 +2,11 @@ import React, { useEffect,useState } from "react";
 import Button from "../components/Button";
 import { useNavigate } from "react-router-dom";
 import UserDeleteModal from "@/components/UserDelateModal";
-
+import { useAuth } from "../contexts/AuthContext";
 
 export default function UserManagementPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [users, setUsers] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState(null);
 
@@ -73,6 +74,10 @@ export default function UserManagementPage() {
       console.error("削除エラー:", error);
     }
   };
+
+  if  (user?.role !== "admin"){
+    return <div>このページにアクセスする権限がありません。</div>;
+  }
 
   return (
     <div>

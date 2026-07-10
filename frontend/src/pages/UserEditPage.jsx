@@ -4,11 +4,13 @@ import React, { useState, useEffect } from "react";
 import { editUser } from "../services/userService";
 import { useNavigate } from "react-router-dom";
 import { getCurrentUser } from "../services/authService";
+import { useAuth } from "../contexts/AuthContext";
 
 function UserEditPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { id } = useParams();
-  const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
   
 
   useEffect(() => {
@@ -17,7 +19,7 @@ function UserEditPage() {
       if (!id) {
         const data = await getCurrentUser();
 
-        setUser(data.user);
+        setProfile(data.user);
         return;
       }
 
@@ -25,7 +27,7 @@ function UserEditPage() {
       const res = await fetch(`/api/v1/users/${id}`);
       const data = await res.json();
 
-      setUser(data);
+      setProfile(data);
     };
     fetchUser();
   }, [id]);
@@ -33,7 +35,7 @@ function UserEditPage() {
   //const { editUser } = useMembers();
     
     const handleSubmit = async (formData) => {
-        const targetId = id || user.user_id;
+        const targetId = id || profile.user_id;
         console.log("ページの親の中", formData);
         console.log(formData.icon_image);
         try {
@@ -47,8 +49,12 @@ function UserEditPage() {
         }
       };
 
-  if (!user) {
+  if (!profile) {
     return <div>読み込み中...</div>;
+  }
+
+  if (!user) {
+    return  navigate("/");
   }
 
   return (
@@ -56,7 +62,7 @@ function UserEditPage() {
       <h1>ユーザー編集</h1>
       <UserForm
         mode="edit"
-        initialData={user}
+        initialData={profile}
         onSubmit={handleSubmit}
       />
     </div>

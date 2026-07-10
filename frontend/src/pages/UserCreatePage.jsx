@@ -3,10 +3,11 @@ import UserForm from "../components/UserForm";
 import { createUser } from "../services/userService";
 import { useNavigate } from "react-router-dom";
 //import { useMembers } from "../components/hooks/useMembers";
-
+import { useAuth } from "../contexts/AuthContext";
 
 function UserCreatePage() {
   //const { createUser } = useMembers();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (formData) => {
@@ -22,6 +23,10 @@ function UserCreatePage() {
       alert("登録に失敗しました。入力内容を確認してください。");
     }
   };
+
+  if  (user?.role !== "admin"){
+     return <div>このページにアクセスする権限がありません。</div>;
+  }
 
   return (
     <div>

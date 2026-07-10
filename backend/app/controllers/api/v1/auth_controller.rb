@@ -30,6 +30,8 @@ class Api::V1::AuthController < ApplicationController
         message: "Login successful",
         user: {
           id: user.id,
+          role: user.role,
+          name: user.name,
           email: user.email
         }
       }, status: :ok
