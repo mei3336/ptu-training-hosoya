@@ -26,8 +26,11 @@ function MemberListPage() {
       .catch(err => {
         console.error("データ取得エラー:", err);
       });
-  }, [user]);
-
+  }, []);
+  
+  if (!user) {
+    return  navigate("/");
+  }
   return (
     <div>
       <h1>メンバー一覧</h1>

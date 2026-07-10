@@ -12,7 +12,9 @@
       post "mfa/verify", to: "mfa#verify"
 
       # ユーザー管理
-      resources :users
+      resources :users do
+        patch :update_role, on: :member
+      end
 
     end
   end
