@@ -20,7 +20,10 @@ function MyPage() {
 
       console.log("取得成功", data);
 
-      setUser(data.user);
+      setUser({
+        ...data.user,
+        icon_image_url: data.icon_image_url,
+    });
     })();
   }, []);
 

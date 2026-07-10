@@ -3,7 +3,7 @@ class Api::V1::UsersController < ApplicationController
     before_action :require_admin, only: [:destroy, :update_role] #あとで、どこが管理者権限？一般開放？をもう一回確かめながら実装。 
 
    def index
-     @users = User.all
+     @users = User.order(updated_at: :desc)
 
      render json: @users.map { |user|
         {
