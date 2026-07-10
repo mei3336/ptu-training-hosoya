@@ -2,13 +2,15 @@ import React, { useEffect,useState } from "react";
 import Button from "../components/Button";
 import { useNavigate } from "react-router-dom";
 import UserDeleteModal from "@/components/UserDelateModal";
+import UserRoleModal from "@/components/UserRoleEditModal";
 import { useAuth } from "../contexts/AuthContext";
 
 export default function UserManagementPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [users, setUsers] = useState([]);
-  const [selectedUsers, setSelectedUsers] = useState(null);
+  const [selectedDeleteUser, setSelectedDeleteUser] = useState(null);
+  const [selectedRoleUser, setSelectedRoleUser] = useState(null);
 
   useEffect(() => {
     fetch('/api/v1/users') // プロキシ設定が効いていればこれでOK
@@ -34,26 +36,48 @@ export default function UserManagementPage() {
         console.error("データ取得エラー:", err);
       });
   }, []);
+  
+  const handleRoleUpdate = async (userId, role) => {
+    try {
+      const res = await fetch(
+        `/api/v1/users/${userId}/update_role`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user: {
+              role,
+            },
+          }),
+        }
+      );
 
-  const toggleRole = (id) => {
-    setUsers((prev) =>
-      prev.map((user) =>
-        user.id === id
-          ? {
-              ...user,
-              role: user.role === "admin" ? "member" : "admin",
-            }
-          : user
-      )
-    );
+      if (!res.ok) {
+        throw new Error("権限更新に失敗しました");
+      }
+
+      setUsers((prev) =>
+        prev.map((user) =>
+          user.id === userId
+            ? { ...user, role }
+            : user
+        )
+      );
+
+      setSelectedRoleUser(null);
+    } catch (error) {
+      console.error("権限更新エラー:", error);
+    }
   };
 
   const handleDelete = async () => {
-    if (!selectedUsers) return;
+    if (!selectedDeleteUser) return;
 
     try {
       const res = await fetch(
-        `/api/v1/users/${selectedUsers.id}`,
+        `/api/v1/users/${selectedDeleteUser.id}`,
         {
           method: "DELETE",
         }
@@ -65,11 +89,11 @@ export default function UserManagementPage() {
 
       setUsers((prev) =>
         prev.filter(
-          (user) => user.id !== selectedUsers.id
+          (user) => user.id !== selectedDeleteUser.id
         )
       );
 
-      setSelectedUsers(null);
+      setSelectedDeleteUser(null);
     } catch (error) {
       console.error("削除エラー:", error);
     }
@@ -150,12 +174,7 @@ export default function UserManagementPage() {
 
                   <td>
                     <Button
-                      onClick={() => toggleRole(user.id)}
-                      className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
-                        user.role === "admin"
-                          ? "border-red-200 bg-red-50 text-red-600"
-                          : "border-gray-200 bg-gray-100 text-gray-700"
-                      }`}
+                      onClick={() => setSelectedRoleUser(user)}
                     >
                       {user.role === "admin"
                         ? "◉ 管理者"
@@ -175,7 +194,7 @@ export default function UserManagementPage() {
 
                       <Button
                         variant="danger"
-                        onClick={() => setSelectedUsers(user)}
+                        onClick={() => setSelectedDeleteUser(user)}
                       >
                         削除
                       </Button>
@@ -190,10 +209,17 @@ export default function UserManagementPage() {
 
       {/*モーダル*/}
       <UserDeleteModal
-        isOpen={!!selectedUsers}
-        onClose={() => setSelectedUsers(null)}
-        user={selectedUsers}
+        isOpen={!!selectedDeleteUser}
+        onClose={() => setSelectedDeleteUser(null)}
+        user={selectedDeleteUser}
         onDelete={handleDelete}
+      />
+  
+      <UserRoleModal
+        isOpen={!!selectedRoleUser}
+        onClose={() => setSelectedRoleUser(null)}
+        user={selectedRoleUser}
+        onUpdate={handleRoleUpdate}
       />
     </div>
   );
