@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 
 
 function MyPage() {
-// 仮のユーザーデータ 本番は　MyPage(user) {
 
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
@@ -14,17 +13,15 @@ function MyPage() {
   useEffect(() => {
     console.log("useEffect実行");
 
-    const fetchCurrentUser = async () => {
+    (async () => {
       console.log("API呼び出し前");
 
       const data = await getCurrentUser();
 
       console.log("取得成功", data);
 
-      setUser(data);
-    };
-
-    fetchCurrentUser();
+      setUser(data.user);
+    })();
   }, []);
 
 
@@ -45,13 +42,14 @@ function MyPage() {
 
         {/* メンバーカード流用 */}
         <div className="mypage-member-card">
-          <MemberCard member={user} />
+          <MemberCard member={user}
+          />
         </div>
 
 
         <div className="flex justify-end gap-2 mt-8">
           <Button
-            onClick={() => navigate("/users/id/edit".replace("id", user.id))}
+            onClick={() => navigate("/mypage/edit")}
           >
             編集する
           </Button>

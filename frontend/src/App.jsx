@@ -71,6 +71,15 @@ function App() {
           }
         />
 
+        <Route
+          path="/mypage/edit"
+          element={
+            <MainLayout>
+              <UserEditPage/>
+            </MainLayout>
+          }
+        />
+
       </Routes>
     </BrowserRouter>
   );
