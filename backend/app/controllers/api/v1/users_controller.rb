@@ -78,6 +78,38 @@ class Api::V1::UsersController < ApplicationController
         end
     end
 
+
+    def withdraw
+        user = current_user
+
+        admin_count = User.where(role: "admin").count
+
+        if user.role == "admin" && admin_count <= 1
+        return render json: {
+            error: "最後の管理者は退会できません"
+        }, status: :conflict
+        end
+
+        user.destroy!
+
+        head :no_content
+    end
+    
+    def cancel_app_usage
+        admin_count = User.where(role: "admin").count
+
+        if admin_count > 1
+            return render json: {
+            error: "他の管理者が存在するため実行できません"
+            }, status: :conflict
+        end
+
+        User.destroy_all
+
+        head :no_content
+    end
+
+
     private
 
     def user_params

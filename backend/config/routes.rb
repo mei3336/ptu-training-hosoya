@@ -14,6 +14,10 @@
       # ユーザー管理
       resources :users do
         patch :update_role, on: :member
+        
+        delete :withdraw, on: :collection
+        delete :cancel_app_usage, on: :collection
+
       end
 
     end
