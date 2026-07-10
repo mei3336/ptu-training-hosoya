@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import UserDeleteModal from "@/components/UserDelateModal";
 import UserRoleModal from "@/components/UserRoleEditModal";
 import { useAuth } from "../contexts/AuthContext";
+import ConfirmRoleModal from "@/components/RoleConfirmModal";
 
 export default function UserManagementPage() {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ export default function UserManagementPage() {
   const [users, setUsers] = useState([]);
   const [selectedDeleteUser, setSelectedDeleteUser] = useState(null);
   const [selectedRoleUser, setSelectedRoleUser] = useState(null);
+  const [roleConfirm, setRoleConfirm] = useState(null);
 
   useEffect(() => {
     fetch('/api/v1/users') // プロキシ設定が効いていればこれでOK
@@ -219,7 +221,29 @@ export default function UserManagementPage() {
         isOpen={!!selectedRoleUser}
         onClose={() => setSelectedRoleUser(null)}
         user={selectedRoleUser}
-        onUpdate={handleRoleUpdate}
+        onUpdate={(userId, role) => {
+          setRoleConfirm({
+            userId,
+            user: selectedRoleUser,
+            role,
+          });
+        }}
+      />
+
+      <ConfirmRoleModal
+        isOpen={!!roleConfirm}
+        user={roleConfirm?.user}
+        role={roleConfirm?.role}
+        onClose={() => setRoleConfirm(null)}
+        onConfirm={() => {
+          handleRoleUpdate(
+            roleConfirm.userId,
+            roleConfirm.role
+          );
+
+          setRoleConfirm(null);
+          setSelectedRoleUser(null);
+        }}
       />
     </div>
   );
