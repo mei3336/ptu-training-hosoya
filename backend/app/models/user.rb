@@ -1,8 +1,11 @@
 class User < ApplicationRecord
+  self.primary_key = "user_id"
+
   enum :role, {
         admin: 1,
         member: 2
   }
+  
 
   has_one_attached :icon_image
   has_secure_password

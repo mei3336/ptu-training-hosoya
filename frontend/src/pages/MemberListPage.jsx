@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
 import MemberCard from "../components/MemberCard";
 import UserDetailModal from "../components/UserDetailModal";
+import { useAuth } from "../contexts/AuthContext";
 
 function MemberListPage() {
+  const { user } = useAuth();
+
   const [members, setMembers] = useState([]);
   const [selectedMember, setSelectedMember] = useState(null);
 
   useEffect(() => {
+    console.log("ログインユーザー", user);
     // バックエンドのAPIURLを指定（Docker環境なら /api/users など）
     fetch('/api/v1/users') // プロキシ設定が効いていればこれでOK
       .then(res => {
@@ -22,7 +26,7 @@ function MemberListPage() {
       .catch(err => {
         console.error("データ取得エラー:", err);
       });
-  }, []);
+  }, [user]);
 
   return (
     <div>

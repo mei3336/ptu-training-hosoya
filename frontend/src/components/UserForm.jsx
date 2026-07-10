@@ -1,9 +1,10 @@
 import Input from "./Input";
 import Button from "./Button";
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 function UserForm({ mode = "create", initialData = {}, onSubmit }) {
-
+  const navigate = useNavigate();
   const [formData, setFormData] = React.useState({
     name: initialData.name || "",
     nickname: initialData.nickname || "",
@@ -102,13 +103,19 @@ function UserForm({ mode = "create", initialData = {}, onSubmit }) {
       />
 
     </div>
-
-    <Button type="submit">
-      {mode === "create"
-        ? "登録する"
-        : "更新する"}
-    </Button>
-
+    <div className="flex justify-end gap-2 mt-8">
+      <Button type="submit">
+        {mode === "create"
+          ? "登録する"
+          : "更新する"}
+      </Button>
+      <Button
+        variant="secondary"
+        onClick={() => navigate(-1)}
+      >
+        戻る
+      </Button>   
+    </div>
   </form>;
 }
 

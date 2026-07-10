@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
- 
+import { AuthProvider } from "./contexts/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
+
 import LoginPage from "./pages/LoginPage";
 import MemberListPage from "./pages/MemberListPage";
 import UserCreatePage from "./pages/UserCreatePage";
@@ -12,67 +14,102 @@ import "./App.css";
  
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* ログイン */}
-        <Route
-          path="/"
-          element={
-            <MainLayout>
-              <LoginPage />
-            </MainLayout>
-          }
-        />
- 
-        {/* ログイン後 */}
-        <Route
-          path="/members"
-          element={
-            <MainLayout>
-              <MemberListPage />
-            </MainLayout>
-          }
-        />
-        
- 
-        <Route
-          path="/users"
-          element={
-            <MainLayout>
-              <UserManagementPage />
-            </MainLayout>
-          }
-        />
- 
-        <Route
-          path="/users/create"
-          element={
-            <MainLayout>
-              <UserCreatePage />
-            </MainLayout>
-          }
-        />
- 
-        <Route
-          path="/users/:id/edit"
-          element={
-            <MainLayout>
-              <UserEditPage />
-            </MainLayout>
-          }
-        />
-        
-        <Route
-          path="/mypage"
-          element={
-            <MainLayout>
-              <MyPage/>
-            </MainLayout>
-          }
-        />
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* ログイン */}
+          <Route
+            path="/"
+            element={
+              <MainLayout>
+                <LoginPage />
+              </MainLayout>
+            }
+          />
+  
+          {/* ログイン後 */}
+          <Route
+            path="/members"
+            element={
+              <ProtectedRoute
+              allowedRoles={["admin", "member"]}
+              >
+                <MainLayout>
+                  <MemberListPage />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+          
+  
+          <Route
+            path="/users"
+            element={
+              <ProtectedRoute
+                allowedRoles={["admin"]}
+              >
+              <MainLayout>
+                <UserManagementPage />
+              </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+  
+          <Route
+            path="/users/create"
+            element={
+              <ProtectedRoute
+                allowedRoles={["admin"]}
+              >
+              <MainLayout>
+                <UserCreatePage />
+              </MainLayout>
+            </ProtectedRoute>
+            }
+          />
+  
+          <Route
+            path="/users/:id/edit"
+            element={
+              <ProtectedRoute
+                allowedRoles={["admin"]}
+              >
+              <MainLayout>
+                <UserEditPage />
+              </MainLayout>
+            </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/mypage"
+            element={
+              <ProtectedRoute
+                allowedRoles={["admin", "member"]}
+              >
+                <MainLayout>
+                  <MyPage/>
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
 
-      </Routes>
-    </BrowserRouter>
+          <Route
+            path="/mypage/edit"
+            element={
+              <ProtectedRoute
+                allowedRoles={["admin", "member"]}
+              >
+                <MainLayout>
+                  <UserEditPage/>
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
  
