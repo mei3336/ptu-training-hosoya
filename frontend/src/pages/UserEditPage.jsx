@@ -37,8 +37,6 @@ function UserEditPage() {
     
     const handleSubmit = async (formData) => {
         const targetId = id || profile.user_id;
-        console.log("ページの親の中", formData);
-        console.log(formData.icon_image);
         try {
           await editUser(targetId, formData);
           alert("ユーザー情報を更新しました！");
@@ -46,7 +44,6 @@ function UserEditPage() {
 
         } catch (error) {
           if (error.response && error.response.status === 422) {
-            console.log("validation errors", error.response.data.errors);
             // Railsから届いた { errors: { name: [...], email: [...] } } をそのままセット
             setErrors(error.response.data.errors);
           } else {
@@ -55,12 +52,18 @@ function UserEditPage() {
         }
     };
 
+  useEffect(() => {
+    if (!user) {
+      navigate("/");
+    }
+  }, [user, navigate]);
+
   if (!profile) {
     return <div>読み込み中...</div>;
   }
 
   if (!user) {
-    return  navigate("/");
+    return null;
   }
 
   return (

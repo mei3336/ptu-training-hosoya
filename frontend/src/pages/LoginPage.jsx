@@ -17,8 +17,6 @@ function LoginPage() {
       const response = await loginApi(email, password);
 
       if (response.result === "success") {
-        console.log("navigate前");
-
         login({
           id: response.user.id,
           role: response.user.role,
@@ -29,7 +27,6 @@ function LoginPage() {
       }
     } catch (error) {
       if (error.status === 401) {
-        console.log("validation errors", error.data);
         // Railsから届いた { errors: { name: [...], email: [...] } } をそのままセット
         setErrors(error.data.errors);
       } else {

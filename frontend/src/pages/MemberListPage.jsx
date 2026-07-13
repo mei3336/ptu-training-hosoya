@@ -18,7 +18,6 @@ function MemberListPage() {
   }, [user, navigate]);
 
   useEffect(() => {
-    console.log("ログインユーザー", user);
     // バックエンドのAPIURLを指定（Docker環境なら /api/users など）
     fetch('/api/v1/users') // プロキシ設定が効いていればこれでOK
       .then(res => {
@@ -28,7 +27,6 @@ function MemberListPage() {
         return res.json();
       })
       .then(data => {
-        console.log("取得データ:", data); // これがブラウザのコンソールに出るか確認
         setMembers(data);
       })
       .catch(err => {

@@ -12,7 +12,6 @@ function UserCreatePage() {
   const [errors, setErrors] = React.useState({});
 
   const handleSubmit = async (formData) => {
-    console.log("ページの親の中", formData);
     try {
       await createUser(formData);
       alert("メンバー登録が完了しました！");
@@ -20,7 +19,6 @@ function UserCreatePage() {
 
     } catch (error) {
       if (error.response && error.response.status === 422) {
-        console.log("validation errors", error.response.data.errors);
         // Railsから届いた { errors: { name: [...], email: [...] } } をそのままセット
         setErrors(error.response.data.errors);
       } else {

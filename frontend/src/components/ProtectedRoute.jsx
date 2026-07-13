@@ -9,7 +9,6 @@ export default function ProtectedRoute({
 
   const navigate = useNavigate();
   const { user } = useAuth();
-  console.log("ProtectedRoute", user);
 
   if (!user) {
     return <Navigate to="/" replace />;

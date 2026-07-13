@@ -24,7 +24,6 @@ export default function UserManagementPage() {
         return res.json();
       })
       .then(data => {
-        console.log("取得データ:", data); // これがブラウザのコンソールに出るか確認
         const formattedMembers = data.map(user => ({
           id: user.id,             // Railsの user_id を id に統一
           name: user.name,

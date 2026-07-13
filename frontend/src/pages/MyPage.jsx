@@ -16,14 +16,8 @@ function MyPage() {
   const [profile, setProfile] = useState(null);
   
   useEffect(() => {
-    console.log("useEffect実行");
-
     (async () => {
-      console.log("API呼び出し前");
-
       const data = await getCurrentUser();
-
-      console.log("取得成功", data);
 
       setProfile({
         ...data.user,

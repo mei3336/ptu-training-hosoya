@@ -49,7 +49,6 @@ function UserForm({ mode = "create", initialData = {}, onSubmit, errors={}}) {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    console.log(formData);
     onSubmit(formData);
   };
 
