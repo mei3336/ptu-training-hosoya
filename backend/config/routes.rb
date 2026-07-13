@@ -8,8 +8,10 @@
       get  "me",     to: "auth#me"
 
       # MFA
-      post "mfa/setup",  to: "mfa#setup"
-      post "mfa/verify", to: "mfa#verify"
+      post   "mfa/setup",        to: "mfa#setup"
+      post   "mfa/verify",       to: "mfa#verify"
+      post   "mfa/verify_login", to: "mfa#verify_login"
+      delete "mfa",              to: "mfa#disable"
 
       # ユーザー管理
       resources :users do

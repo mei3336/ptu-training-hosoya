@@ -1,10 +1,17 @@
 import Button from "@/components/Button";
+import Input from "@/components/Input";
 import MemberCard from "@/components/MemberCard";
 import { useNavigate } from "react-router-dom";
-import { getCurrentUser } from "@/services/authService";
+import {
+  getCurrentUser,
+  setupMfa,
+  verifyMfaSetup,
+  disableMfa,
+} from "@/services/authService";
 import { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { logout as logoutApi } from "@/services/authService";
+import { useToast } from "@/contexts/ToastContext";
 
 import LastAdminWarningModal from "@/components/LastAdminWarningModal";
 import WithdrawModal from "@/components/WithdrawModal";
@@ -12,9 +19,10 @@ import OrganizationWithdrawModal from "@/components/OrganizationWithdrawModal";
 
 function MyPage() {
   const { user, logout } = useAuth();
+  const { showToast } = useToast();
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
-  
+
   useEffect(() => {
     (async () => {
       const data = await getCurrentUser();
@@ -25,6 +33,51 @@ function MyPage() {
     });
     })();
   }, []);
+
+  const [mfaSetupInfo, setMfaSetupInfo] = useState(null);
+  const [mfaCode, setMfaCode] = useState("");
+  const [mfaError, setMfaError] = useState(null);
+  const [isMfaSubmitting, setIsMfaSubmitting] = useState(false);
+
+  const handleStartMfaSetup = async () => {
+    try {
+      const info = await setupMfa();
+      setMfaSetupInfo(info);
+      setMfaCode("");
+      setMfaError(null);
+    } catch {
+      showToast("二要素認証の設定開始に失敗しました。", "error");
+    }
+  };
+
+  const handleConfirmMfaSetup = async (e) => {
+    e.preventDefault();
+    if (isMfaSubmitting) return;
+
+    setIsMfaSubmitting(true);
+    try {
+      await verifyMfaSetup(mfaSetupInfo.secret, mfaCode);
+      setProfile((prev) => ({ ...prev, otp_secret_key: mfaSetupInfo.secret }));
+      setMfaSetupInfo(null);
+      setMfaCode("");
+      setMfaError(null);
+      showToast("二要素認証を有効にしました。");
+    } catch (error) {
+      setMfaError(error.data?.errors?.code?.[0] || "確認コードが正しくありません。");
+    } finally {
+      setIsMfaSubmitting(false);
+    }
+  };
+
+  const handleDisableMfa = async () => {
+    try {
+      await disableMfa();
+      setProfile((prev) => ({ ...prev, otp_secret_key: null }));
+      showToast("二要素認証を無効にしました。");
+    } catch {
+      showToast("二要素認証の無効化に失敗しました。", "error");
+    }
+  };
 
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] =
     useState(false);
@@ -118,6 +171,66 @@ function MyPage() {
           <MemberCard member={profile}
           />
         </div>
+
+        {user?.role === "admin" && (
+          <div className="mt-8 rounded border border-gray-200 p-4">
+            <h2 className="text-lg font-bold">二要素認証</h2>
+
+            {profile.otp_secret_key ? (
+              <>
+                <p className="mt-2 text-gray-600">現在、二要素認証は有効です。</p>
+                <Button
+                  variant="danger"
+                  className="mt-2"
+                  onClick={handleDisableMfa}
+                >
+                  二要素認証を無効にする
+                </Button>
+              </>
+            ) : mfaSetupInfo ? (
+              <form onSubmit={handleConfirmMfaSetup}>
+                <p className="mt-2 text-gray-600">
+                  認証アプリ(Google Authenticator等)に以下のシークレットキーを
+                  手動で登録し、表示された6桁のコードを入力してください。
+                </p>
+                <p className="mt-2 font-mono break-all">{mfaSetupInfo.secret}</p>
+
+                <Input
+                  label="確認コード"
+                  name="mfaCode"
+                  placeholder="123456"
+                  value={mfaCode}
+                  onChange={(e) => setMfaCode(e.target.value)}
+                  error={mfaError}
+                />
+
+                <div className="flex gap-2">
+                  <Button type="submit" disabled={isMfaSubmitting}>
+                    {isMfaSubmitting ? "確認中..." : "有効にする"}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => {
+                      setMfaSetupInfo(null);
+                      setMfaCode("");
+                      setMfaError(null);
+                    }}
+                  >
+                    キャンセル
+                  </Button>
+                </div>
+              </form>
+            ) : (
+              <>
+                <p className="mt-2 text-gray-600">二要素認証は現在無効です。</p>
+                <Button className="mt-2" onClick={handleStartMfaSetup}>
+                  二要素認証を設定する
+                </Button>
+              </>
+            )}
+          </div>
+        )}
 
 
         <div className="flex justify-end gap-2 mt-8">

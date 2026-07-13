@@ -86,6 +86,10 @@ class User < ApplicationRecord
     update!(login_failure_count: 0, locked_at: nil)
   end
 
+  def mfa_enabled?
+    otp_secret_key.present?
+  end
+
   private
 
   def password_not_same_as_email
