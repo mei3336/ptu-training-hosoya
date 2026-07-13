@@ -12,10 +12,17 @@ export const login = async (email, password) => {
       password,
     }),
   });
+  const data = await response.json();
 
-  return response.json();
+  if (!response.ok) {
+    throw {
+      status: response.status,
+      data,
+    };
+  }
+
+  return data;
 };
-
 export const logout = async () => {
   const response = await fetch(`${API_BASE_URL}/logout`, {
     method: "POST",

@@ -8,3 +8,12 @@ ja:
         password: "パスワード"
         nickname: "ニックネーム"
         bio: "自己紹介"
+  
+  errors:
+    format: "%{attribute}%{message}"
+    messages:
+      invalid_login: "メールアドレスまたはパスワードが違います。"
+
+
+
+        

@@ -41,8 +41,12 @@ class Api::V1::UsersController < ApplicationController
             name: @user.name
             }, status: :created
         else
-            render json: @user.errors.full_messages,
-                status: :unprocessable_entity
+            formatted_errors = {}
+            @user.errors.each do |error|
+                formatted_errors[error.attribute] ||= []
+                formatted_errors[error.attribute] << error.full_message
+            end
+            render json: { errors: formatted_errors }, status: :unprocessable_entity
         end
     end
 
@@ -57,14 +61,23 @@ class Api::V1::UsersController < ApplicationController
 
             render json: @user
         else
-            render json: @user.errors,
-                status: :unprocessable_entity
+            formatted_errors = {}
+            @user.errors.each do |error|
+                formatted_errors[error.attribute] ||= []
+                formatted_errors[error.attribute] << error.full_message
+            end
+            render json: { errors: formatted_errors }, status: :unprocessable_entity
     end
 
     end
 
     def destroy
         @user = User.find(params[:id])
+        if @user.id == current_user.id
+            render json: {error: "自分自身は削除できません"}, 
+            status: :forbidden
+            return
+        end
         @user.destroy
         head :no_content
     end
@@ -77,6 +90,38 @@ class Api::V1::UsersController < ApplicationController
             render json: @user.errors, status: :unprocessable_entity
         end
     end
+
+
+    def withdraw
+        user = current_user
+
+        admin_count = User.where(role: "admin").count
+
+        if user.role == "admin" && admin_count <= 1
+        return render json: {
+            error: "最後の管理者は退会できません"
+        }, status: :conflict
+        end
+
+        user.destroy!
+
+        head :no_content
+    end
+    
+    def cancel_app_usage
+        admin_count = User.where(role: "admin").count
+
+        if admin_count > 1
+            return render json: {
+            error: "他の管理者が存在するため実行できません"
+            }, status: :conflict
+        end
+
+        User.destroy_all
+
+        head :no_content
+    end
+
 
     private
 

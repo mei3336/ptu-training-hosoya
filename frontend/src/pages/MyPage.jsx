@@ -4,9 +4,14 @@ import { useNavigate } from "react-router-dom";
 import { getCurrentUser } from "@/services/authService";
 import { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
+import { logout as logoutApi } from "@/services/authService";
+
+import LastAdminWarningModal from "@/components/LastAdminWarningModal";
+import WithdrawModal from "@/components/WithdrawModal";
+import OrganizationWithdrawModal from "@/components/OrganizationWithdrawModal";
 
 function MyPage() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   
@@ -27,7 +32,74 @@ function MyPage() {
     })();
   }, []);
 
+  const [isWithdrawModalOpen, setIsWithdrawModalOpen] =
+    useState(false);
 
+  const [isLastAdminModalOpen, setIsLastAdminModalOpen] =
+    useState(false);
+
+  const [isAppTerminationModalOpen, setIsAppTerminationModalOpen] =
+    useState(false);
+
+  const handleWithdraw = async () => {
+    try {
+      const res = await fetch(
+        "/api/v1/users/withdraw",
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+
+      );
+
+      if (res.status === 409) {
+        setIsWithdrawModalOpen(false);
+        setIsLastAdminModalOpen(true);
+        return;
+      }
+
+      if (!res.ok) {
+        throw new Error("退会に失敗しました");
+      }
+      await logoutApi();
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+      logout();
+      navigate("/");
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleAppTermination = async () => {
+    try {
+      const res = await fetch(
+        "/api/v1/users/cancel_app_usage",
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error("アプリ利用終了に失敗しました");
+      }
+      
+      await logoutApi();
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+      logout();
+      navigate("/");
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+    
 
   if (!profile) {
     return <div>読み込み中...</div>;
@@ -67,8 +139,42 @@ function MyPage() {
           >
             戻る
           </Button>
+           {user?.role === "admin" && (
+              <Button
+                variant="danger"
+                onClick={() =>setIsWithdrawModalOpen(user)}
+              >
+                退会する
+              </Button>
+             )}
         </div>
-      </div>
+          {user?.role === "admin" && (
+            <>
+              <WithdrawModal
+                isOpen={isWithdrawModalOpen}
+                onClose={() => setIsWithdrawModalOpen(false)}
+                onConfirm={handleWithdraw}
+              />
+
+              <LastAdminWarningModal
+                isOpen={isLastAdminModalOpen}
+                onClose={() => setIsLastAdminModalOpen(false)}
+                onOrganizationWithdraw={() => {
+                  setIsLastAdminModalOpen(false);
+                  setIsAppTerminationModalOpen(true);
+                }}
+              />
+
+              <OrganizationWithdrawModal
+                isOpen={isAppTerminationModalOpen}
+                onClose={() =>
+                  setIsAppTerminationModalOpen(false)
+                }
+                onConfirm={handleAppTermination}
+              />
+            </>
+          )}
+    </div>
   );
 }
 

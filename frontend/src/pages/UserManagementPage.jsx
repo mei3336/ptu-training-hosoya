@@ -4,13 +4,16 @@ import { useNavigate } from "react-router-dom";
 import UserDeleteModal from "@/components/UserDelateModal";
 import UserRoleModal from "@/components/UserRoleEditModal";
 import { useAuth } from "../contexts/AuthContext";
+import ConfirmRoleModal from "@/components/RoleConfirmModal";
 
 export default function UserManagementPage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user:  currentUser } = useAuth();
   const [users, setUsers] = useState([]);
   const [selectedDeleteUser, setSelectedDeleteUser] = useState(null);
   const [selectedRoleUser, setSelectedRoleUser] = useState(null);
+  const [roleConfirm, setRoleConfirm] = useState(null);
+  const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
     fetch('/api/v1/users') // プロキシ設定が効いていればこれでOK
@@ -65,8 +68,13 @@ export default function UserManagementPage() {
             : user
         )
       );
-
+      const roleLabel =
+        role === "admin" ? "管理者" : "一般メンバー";
+      setSuccessMessage(`${selectedRoleUser.name}さんの権限を「${roleLabel}」に変更しました。`);
       setSelectedRoleUser(null);
+      setTimeout(() => {  
+        setSuccessMessage("");
+      }, 3000);
     } catch (error) {
       console.error("権限更新エラー:", error);
     }
@@ -92,14 +100,18 @@ export default function UserManagementPage() {
           (user) => user.id !== selectedDeleteUser.id
         )
       );
-
+      setSuccessMessage(`${selectedDeleteUser.name}さんのユーザー情報を削除しました。`);
       setSelectedDeleteUser(null);
+      setTimeout(() => {  
+        setSuccessMessage("");
+      }, 3000);
+
     } catch (error) {
       console.error("削除エラー:", error);
     }
   };
 
-  if  (user?.role !== "admin"){
+  if  (currentUser?.role !== "admin"){
     return <div>このページにアクセスする権限がありません。</div>;
   }
 
@@ -115,7 +127,13 @@ export default function UserManagementPage() {
             <p>
               全メンバーの情報管理と権限設定を行います。
             </p>
+            {successMessage && (
+              <div className="mb-4 rounded border border-green-300 bg-green-100 px-4 py-2 text-green-800">
+                {successMessage}
+              </div>
+            )}
           </div>
+
 
 
           <Button
@@ -191,13 +209,15 @@ export default function UserManagementPage() {
                         編集
                       </Button>
 
-
-                      <Button
-                        variant="danger"
-                        onClick={() => setSelectedDeleteUser(user)}
-                      >
-                        削除
-                      </Button>
+                      {user.id !== currentUser?.id && (
+                        <Button
+                          variant="danger"
+                          onClick={() => setSelectedDeleteUser(user)}
+                        >
+                          削除
+                        </Button>
+                      )}
+                      
                     </div>
                   </td>
                 </tr>
@@ -219,7 +239,29 @@ export default function UserManagementPage() {
         isOpen={!!selectedRoleUser}
         onClose={() => setSelectedRoleUser(null)}
         user={selectedRoleUser}
-        onUpdate={handleRoleUpdate}
+        onUpdate={(userId, role) => {
+          setRoleConfirm({
+            userId,
+            user: selectedRoleUser,
+            role,
+          });
+        }}
+      />
+
+      <ConfirmRoleModal
+        isOpen={!!roleConfirm}
+        user={roleConfirm?.user}
+        role={roleConfirm?.role}
+        onClose={() => setRoleConfirm(null)}
+        onConfirm={() => {
+          handleRoleUpdate(
+            roleConfirm.userId,
+            roleConfirm.role
+          );
+
+          setRoleConfirm(null);
+          setSelectedRoleUser(null);
+        }}
       />
     </div>
   );
