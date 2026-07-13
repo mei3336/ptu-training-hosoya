@@ -11,6 +11,7 @@ function UserEditPage() {
   const { user } = useAuth();
   const { id } = useParams();
   const [profile, setProfile] = useState(null);
+  const [errors, setErrors] = React.useState({});
   
 
   useEffect(() => {
@@ -44,10 +45,15 @@ function UserEditPage() {
           navigate(-1);
 
         } catch (error) {
-          console.error("登録エラー:",error);
-          alert("登録に失敗しました。入力内容を確認してください。");
+          if (error.response && error.response.status === 422) {
+            console.log("validation errors", error.response.data.errors);
+            // Railsから届いた { errors: { name: [...], email: [...] } } をそのままセット
+            setErrors(error.response.data.errors);
+          } else {
+            alert('通信エラーが発生しました。');
+          }
         }
-      };
+    };
 
   if (!profile) {
     return <div>読み込み中...</div>;
@@ -64,6 +70,7 @@ function UserEditPage() {
         mode="edit"
         initialData={profile}
         onSubmit={handleSubmit}
+        errors = {errors}
       />
     </div>
   );

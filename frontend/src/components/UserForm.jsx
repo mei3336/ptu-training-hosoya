@@ -3,7 +3,7 @@ import Button from "./Button";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-function UserForm({ mode = "create", initialData = {}, onSubmit }) {
+function UserForm({ mode = "create", initialData = {}, onSubmit, errors={}}) {
   const navigate = useNavigate();
   const [formData, setFormData] = React.useState({
     name: initialData.name || "",
@@ -16,7 +16,7 @@ function UserForm({ mode = "create", initialData = {}, onSubmit }) {
   });
 
   React.useEffect(() => {
-    if (!initialData) return;
+    if (mode !== "edit") return;
       
       setFormData(prev => ({
         ...prev,
@@ -27,7 +27,7 @@ function UserForm({ mode = "create", initialData = {}, onSubmit }) {
         bio: initialData.bio || "",
         role: initialData.role || "member",
       }));
-    }, [initialData]);
+  }, [mode,initialData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -57,43 +57,59 @@ function UserForm({ mode = "create", initialData = {}, onSubmit }) {
 
   return <form onSubmit={handleSubmit}>
     <div>
-      <Input
-        label="メールアドレス *"
-        name="email"
-        value={formData.email}
-        onChange={handleChange}
-      />
+      <div>
+        <Input
+          label="メールアドレス *"
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
+          error={errors.email}
+        />
+      </div>
 
-      
-      <Input
-        label="パスワード *"
-        type="password"
-        name="password"
-        value={formData.password}
-        onChange={handleChange}
-      />
 
-      <Input
-        label="氏名 *"
-        name="name"
-        value={formData.name}
-        onChange={handleChange}
-      />
+      <div>
+        <Input
+          label="パスワード *"
+          type="password"
+          name="password"
+          value={formData.password}
+          onChange={handleChange}
+          error={errors.password}
+        />
+      </div>
 
+      <div>
+        <Input
+          label="氏名 *"
+          name="name"
+          value={formData.name}
+          onChange={handleChange}
+          error={errors.name}
+        />
+      </div>
+
+      <div>
       <Input
         label="ニックネーム"
         name="nickname"
         value={formData.nickname}
         onChange={handleChange}
+        error={errors.nickname}
       />
+      </div>
 
+      <div>
       <Input
         label="自己紹介"
         name="bio"
         value={formData.bio}
         onChange={handleChange}
+        error={errors.bio}
       />
+      </div>
 
+      <div>
       <Input
         label="アイコン画像"
         type="file"
@@ -101,6 +117,7 @@ function UserForm({ mode = "create", initialData = {}, onSubmit }) {
         accept="image/*"
         onChange={handleFileChange}
       />
+      </div>
 
     </div>
     <div className="flex justify-end gap-2 mt-8">

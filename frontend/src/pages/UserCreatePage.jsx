@@ -9,18 +9,27 @@ function UserCreatePage() {
   //const { createUser } = useMembers();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [errors, setErrors] = React.useState({});
 
   const handleSubmit = async (formData) => {
     console.log("ページの親の中", formData);
-    console.log(formData.icon_image);
     try {
       await createUser(formData);
       alert("メンバー登録が完了しました！");
       navigate("/users");
 
     } catch (error) {
-      console.error("登録エラー:",error);
-      alert("登録に失敗しました。入力内容を確認してください。");
+      console.log("catch入った");
+      console.log(error);
+      console.log(error.response);
+      console.log(error.response?.status);
+      if (error.response && error.response.status === 422) {
+        console.log("validation errors", error.response.data.errors);
+        // Railsから届いた { errors: { name: [...], email: [...] } } をそのままセット
+        setErrors(error.response.data.errors);
+      } else {
+        alert('通信エラーが発生しました。');     
+      }
     }
   };
 
@@ -32,8 +41,9 @@ function UserCreatePage() {
     <div>
       <h1>新規メンバー登録</h1>
       <UserForm 
-        
+        mode = "create"
         onSubmit={handleSubmit}
+        errors = {errors}
       />
     </div>
   );

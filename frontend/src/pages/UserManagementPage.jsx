@@ -8,7 +8,7 @@ import ConfirmRoleModal from "@/components/RoleConfirmModal";
 
 export default function UserManagementPage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user:  currentUser } = useAuth();
   const [users, setUsers] = useState([]);
   const [selectedDeleteUser, setSelectedDeleteUser] = useState(null);
   const [selectedRoleUser, setSelectedRoleUser] = useState(null);
@@ -101,7 +101,7 @@ export default function UserManagementPage() {
     }
   };
 
-  if  (user?.role !== "admin"){
+  if  (currentUser?.role !== "admin"){
     return <div>このページにアクセスする権限がありません。</div>;
   }
 
@@ -193,13 +193,15 @@ export default function UserManagementPage() {
                         編集
                       </Button>
 
-
-                      <Button
-                        variant="danger"
-                        onClick={() => setSelectedDeleteUser(user)}
-                      >
-                        削除
-                      </Button>
+                      {user.id !== currentUser?.id && (
+                        <Button
+                          variant="danger"
+                          onClick={() => setSelectedDeleteUser(user)}
+                        >
+                          削除
+                        </Button>
+                      )}
+                      
                     </div>
                   </td>
                 </tr>

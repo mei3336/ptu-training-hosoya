@@ -27,7 +27,7 @@ class Api::V1::AuthController < ApplicationController
 
       render json: {
         result: "success",
-        message: "Login successful",
+        message: "ログインに成功しました",
         user: {
           id: user.id,
           role: user.role,

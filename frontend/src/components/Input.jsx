@@ -10,6 +10,11 @@ function Input({
   onChange,
   error,
 }) {
+  const errorMessages = Array.isArray(error)
+  ? error
+  : error
+    ? [error]
+    : [];
   return (
     <div className="input-container">
       {label && (
@@ -17,6 +22,12 @@ function Input({
           {label}
         </label>
       )}
+      
+      {errorMessages.map((message, index) => (
+        <p key={index} className="input-error-message">
+          {message}
+        </p>
+      ))}      
 
       {description && (
         <p className="input-description">
@@ -33,12 +44,6 @@ function Input({
         onChange={onChange}
         className={`input-field ${error ? "input-error" : ""}`}
       />
-
-      {error && (
-        <p className="input-error-message">
-          {error}
-        </p>
-      )}
     </div>
   );
 }

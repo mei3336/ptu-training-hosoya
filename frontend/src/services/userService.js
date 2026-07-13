@@ -16,12 +16,14 @@ export const createUser = async (userData) => {
   );
 
   const data = await response.json();
-
   if (!response.ok) {
-    throw new Error(data.errors?.join(", ") || "登録失敗");
+    throw {
+      response: {
+        status: response.status,
+        data: data,
+      }
+    }
   }
-
-  return data;
 };
 
 export const editUser = async (id, userData) => {
@@ -44,8 +46,11 @@ export const editUser = async (id, userData) => {
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data.errors?.join(", ") || "更新失敗");
+        throw {
+      response: {
+        status: response.status,
+        data: data,
+      }
+    }
   }
-
-  return data;
 };

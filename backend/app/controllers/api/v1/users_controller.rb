@@ -41,8 +41,12 @@ class Api::V1::UsersController < ApplicationController
             name: @user.name
             }, status: :created
         else
-            render json: @user.errors.full_messages,
-                status: :unprocessable_entity
+            formatted_errors = {}
+            @user.errors.each do |error|
+                formatted_errors[error.attribute] ||= []
+                formatted_errors[error.attribute] << error.full_message
+            end
+            render json: { errors: formatted_errors }, status: :unprocessable_entity
         end
     end
 
@@ -57,14 +61,23 @@ class Api::V1::UsersController < ApplicationController
 
             render json: @user
         else
-            render json: @user.errors,
-                status: :unprocessable_entity
+            formatted_errors = {}
+            @user.errors.each do |error|
+                formatted_errors[error.attribute] ||= []
+                formatted_errors[error.attribute] << error.full_message
+            end
+            render json: { errors: formatted_errors }, status: :unprocessable_entity
     end
 
     end
 
     def destroy
         @user = User.find(params[:id])
+        if @user.id == current_user.id
+            render json: {error: "自分自身は削除できません"}, 
+            status: :forbidden
+            return
+        end
         @user.destroy
         head :no_content
     end
