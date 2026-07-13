@@ -219,6 +219,15 @@ p {
 }
 
 
+.icon-preview {
+  margin-top: 12px;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #e5e7eb;
+}
+
 /* =========================
    マイページ画面
 ========================= */

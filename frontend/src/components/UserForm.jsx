@@ -55,6 +55,8 @@ function UserForm({ mode = "create", initialData = {}, onSubmit, errors={}}) {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [clientErrors, setClientErrors] = React.useState({});
+  const [previewUrl, setPreviewUrl] = React.useState(initialData.icon_image_url || null);
+  const blobUrlRef = React.useRef(null);
   const [formData, setFormData] = React.useState({
     name: initialData.name || "",
     nickname: initialData.nickname || "",
@@ -96,11 +98,29 @@ function UserForm({ mode = "create", initialData = {}, onSubmit, errors={}}) {
 
   
   const handleFileChange = (e) => {
+    const file = e.target.files[0];
     setFormData((prev) => ({
       ...prev,
-      icon_image: e.target.files[0],
+      icon_image: file,
     }));
+
+    if (file) {
+      if (blobUrlRef.current) {
+        URL.revokeObjectURL(blobUrlRef.current);
+      }
+      const objectUrl = URL.createObjectURL(file);
+      blobUrlRef.current = objectUrl;
+      setPreviewUrl(objectUrl);
+    }
   };
+
+  React.useEffect(() => {
+    return () => {
+      if (blobUrlRef.current) {
+        URL.revokeObjectURL(blobUrlRef.current);
+      }
+    };
+  }, []);
 
   
   const handleSubmit = async (e) => {
@@ -201,6 +221,13 @@ function UserForm({ mode = "create", initialData = {}, onSubmit, errors={}}) {
         accept="image/*"
         onChange={handleFileChange}
       />
+      {previewUrl && (
+        <img
+          src={previewUrl}
+          alt="アイコン画像のプレビュー"
+          className="icon-preview"
+        />
+      )}
       </div>
 
     </div>
