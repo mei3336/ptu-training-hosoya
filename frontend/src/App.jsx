@@ -3,6 +3,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ToastProvider } from "./contexts/ToastContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Toast from "./components/Toast";
+import SessionExpiryWatcher from "./components/SessionExpiryWatcher";
 
 import LoginPage from "./pages/LoginPage";
 import MemberListPage from "./pages/MemberListPage";
@@ -20,6 +21,7 @@ function App() {
       <ToastProvider>
         <Toast />
         <BrowserRouter>
+          <SessionExpiryWatcher />
           <Routes>
           {/* ログイン */}
           <Route
