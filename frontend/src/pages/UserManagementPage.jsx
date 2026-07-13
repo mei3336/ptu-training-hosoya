@@ -1,5 +1,6 @@
-import React, { useEffect,useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Button from "../components/Button";
+import Input from "../components/Input";
 import { useNavigate } from "react-router-dom";
 import UserDeleteModal from "@/components/UserDelateModal";
 import UserRoleModal from "@/components/UserRoleEditModal";
@@ -18,6 +19,18 @@ export default function UserManagementPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredUsers = useMemo(() => {
+    const keyword = searchTerm.trim().toLowerCase();
+    if (!keyword) return users;
+
+    return users.filter((user) =>
+      [user.name, user.nickname]
+        .filter(Boolean)
+        .some((value) => value.toLowerCase().includes(keyword))
+    );
+  }, [users, searchTerm]);
 
   useEffect(() => {
     fetch('/api/v1/users') // プロキシ設定が効いていればこれでOK
@@ -31,6 +44,7 @@ export default function UserManagementPage() {
         const formattedMembers = data.map(user => ({
           id: user.id,             // Railsの user_id を id に統一
           name: user.name,
+          nickname: user.nickname,
           email: user.email,
           role: user.role,              // "admin" や "member" という文字列
           // ここで役割に応じたラベルを生成する
@@ -155,8 +169,24 @@ export default function UserManagementPage() {
           <p className="mb-4 text-red-500">{loadError}</p>
         )}
 
-        {/* Table */}
         {!isLoading && !loadError && (
+          <div className="mb-4 max-w-sm">
+            <Input
+              label="氏名・ニックネームで検索"
+              name="userSearch"
+              placeholder="氏名やニックネームを入力"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        )}
+
+        {!isLoading && !loadError && filteredUsers.length === 0 && (
+          <p className="mb-4 text-gray-500">該当するメンバーが見つかりませんでした。</p>
+        )}
+
+        {/* Table */}
+        {!isLoading && !loadError && filteredUsers.length > 0 && (
         <div className="user-table-wrapper">
           <table className="user-table">
             <thead>
@@ -180,7 +210,7 @@ export default function UserManagementPage() {
             </thead>
 
             <tbody>
-              {users.map((user) => (
+              {filteredUsers.map((user) => (
                 <tr
                   key={user.id}
                 >
