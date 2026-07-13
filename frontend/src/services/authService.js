@@ -39,3 +39,70 @@ export const getCurrentUser = async () => {
 
   return response.json();
 };
+
+export const verifyMfaLogin = async (userId, code) => {
+  const response = await fetch(`${API_BASE_URL}/mfa/verify_login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify({ user_id: userId, code }),
+  });
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw {
+      status: response.status,
+      data,
+    };
+  }
+
+  return data;
+};
+
+export const setupMfa = async () => {
+  const response = await fetch(`${API_BASE_URL}/mfa/setup`, {
+    method: "POST",
+    credentials: "include",
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw { status: response.status, data };
+  }
+
+  return data;
+};
+
+export const verifyMfaSetup = async (secret, code) => {
+  const response = await fetch(`${API_BASE_URL}/mfa/verify`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify({ secret, code }),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw { status: response.status, data };
+  }
+
+  return data;
+};
+
+export const disableMfa = async () => {
+  const response = await fetch(`${API_BASE_URL}/mfa`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw { status: response.status, data };
+  }
+
+  return data;
+};

@@ -3,13 +3,15 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ToastProvider } from "./contexts/ToastContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Toast from "./components/Toast";
+import SessionExpiryWatcher from "./components/SessionExpiryWatcher";
 
 import LoginPage from "./pages/LoginPage";
 import MemberListPage from "./pages/MemberListPage";
 import UserCreatePage from "./pages/UserCreatePage";
 import UserEditPage from "./pages/UserEditPage";
 import UserManagementPage from "./pages/UserManagementPage";
-import MyPage from "./pages/MyPage"; 
+import MyPage from "./pages/MyPage";
+import NotFoundPage from "./pages/NotFoundPage";
 import MainLayout from "./layouts/MainLayout";
 import "./App.css";
 
@@ -20,6 +22,7 @@ function App() {
       <ToastProvider>
         <Toast />
         <BrowserRouter>
+          <SessionExpiryWatcher />
           <Routes>
           {/* ログイン */}
           <Route
@@ -108,6 +111,15 @@ function App() {
                   <UserEditPage/>
                 </MainLayout>
               </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="*"
+            element={
+              <MainLayout>
+                <NotFoundPage />
+              </MainLayout>
             }
           />
 

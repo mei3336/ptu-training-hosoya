@@ -1,11 +1,14 @@
 class User < ApplicationRecord
   self.primary_key = "user_id"
 
+  LOGIN_LOCK_THRESHOLD = 5
+  LOGIN_LOCK_DURATION = 15.minutes
+
   enum :role, {
         admin: 1,
         member: 2
   }
-  
+
 
   has_one_attached :icon_image
   has_secure_password
@@ -60,6 +63,32 @@ class User < ApplicationRecord
             
 
   validate :password_not_same_as_email
+
+  # 現在ロック中かどうかを判定する。ロック期間を過ぎていれば自動的に解除する。
+  def locked?
+    return false if locked_at.blank?
+
+    if locked_at < LOGIN_LOCK_DURATION.ago
+      update!(locked_at: nil, login_failure_count: 0)
+      false
+    else
+      true
+    end
+  end
+
+  # ログイン失敗時に呼び出す。閾値に達したらロックする。
+  def register_login_failure!
+    increment!(:login_failure_count)
+    update!(locked_at: Time.current) if login_failure_count >= LOGIN_LOCK_THRESHOLD
+  end
+
+  def reset_login_failure_count!
+    update!(login_failure_count: 0, locked_at: nil)
+  end
+
+  def mfa_enabled?
+    otp_secret_key.present?
+  end
 
   private
 

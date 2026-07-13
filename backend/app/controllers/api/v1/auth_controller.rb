@@ -6,24 +6,26 @@ class Api::V1::AuthController < ApplicationController
   def login
     user = User.find_by(email: params[:email])
 
-    if user&.authenticate(params[:password])
-      token = JWT.encode(
-        {
-          user_id: user.id,
-          exp: 7.days.from_now.to_i
-        },
-        Rails.application.credentials.secret_key_base,
-        "HS256"
-      )
+    if user&.locked?
+      return render json: {
+        errors: {
+          login: [
+            I18n.t("errors.messages.account_locked")
+          ]
+        }
+      }, status: :locked
+    end
 
-      cookies[:jwt] = {
-        value: token,
-        httponly: true,
-        secure: Rails.env.production?,
-        same_site: :lax
-      }
-      Rails.logger.info "COOKIE=#{cookies[:jwt]}"
-      Rails.logger.info response.headers.to_h.inspect
+    if user&.authenticate(params[:password])
+      if user.mfa_enabled?
+        return render json: {
+          result: "mfa_required",
+          user_id: user.id
+        }, status: :ok
+      end
+
+      user.reset_login_failure_count!
+      issue_jwt_cookie(user)
 
       render json: {
         result: "success",
@@ -36,6 +38,8 @@ class Api::V1::AuthController < ApplicationController
         }
       }, status: :ok
     else
+      user&.register_login_failure!
+
       render json: {
         errors: {
           login: [
