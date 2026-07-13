@@ -13,7 +13,8 @@ function LoginPage() {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleLogin = async () => {
+  const handleLogin = async (e) => {
+    e?.preventDefault();
     if (isSubmitting) return;
     setIsSubmitting(true);
     try{
@@ -56,27 +57,29 @@ function LoginPage() {
         </p>
       ))}
 
-      <Input
-        label="メールアドレス"
-        name="email"
-        placeholder="メールアドレスを入力してください"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        error={errors.email}
-      />
-      <Input
-        label="パスワード"
-        name="password"
-        type="password"
-        placeholder="パスワードを入力してください"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        error={errors.password}
-      />
+      <form onSubmit={handleLogin}>
+        <Input
+          label="メールアドレス"
+          name="email"
+          placeholder="メールアドレスを入力してください"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          error={errors.email}
+        />
+        <Input
+          label="パスワード"
+          name="password"
+          type="password"
+          placeholder="パスワードを入力してください"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          error={errors.password}
+        />
 
-      <Button variant="primary" onClick={handleLogin} disabled={isSubmitting}>
-        {isSubmitting ? "ログイン中..." : "ログイン"}
-      </Button>
+        <Button type="submit" variant="primary" disabled={isSubmitting}>
+          {isSubmitting ? "ログイン中..." : "ログイン"}
+        </Button>
+      </form>
     </div>
   );
 }
