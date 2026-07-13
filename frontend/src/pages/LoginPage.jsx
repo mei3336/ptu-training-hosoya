@@ -16,6 +16,19 @@ function LoginPage() {
   const handleLogin = async (e) => {
     e?.preventDefault();
     if (isSubmitting) return;
+
+    const validationErrors = {};
+    if (!email.trim()) {
+      validationErrors.email = ["を入力してください。"];
+    }
+    if (!password) {
+      validationErrors.password = ["を入力してください。"];
+    }
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
     setIsSubmitting(true);
     try{
       const response = await loginApi(email, password);
