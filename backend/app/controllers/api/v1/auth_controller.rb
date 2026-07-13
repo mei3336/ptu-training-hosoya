@@ -37,9 +37,14 @@ class Api::V1::AuthController < ApplicationController
       }, status: :ok
     else
       render json: {
-        error: "Invalid email or password"
+        errors: {
+          login: [
+            I18n.t("errors.messages.invalid_login")
+          ]
+        }
       }, status: :unauthorized
     end
+    return
   end
 
   def logout

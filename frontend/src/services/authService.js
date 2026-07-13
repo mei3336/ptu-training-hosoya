@@ -12,8 +12,7 @@ export const login = async (email, password) => {
       password,
     }),
   });
-
-  return response.json();
+   return response.json();
 };
 
 export const logout = async () => {

@@ -19,10 +19,6 @@ function UserCreatePage() {
       navigate("/users");
 
     } catch (error) {
-      console.log("catch入った");
-      console.log(error);
-      console.log(error.response);
-      console.log(error.response?.status);
       if (error.response && error.response.status === 422) {
         console.log("validation errors", error.response.data.errors);
         // Railsから届いた { errors: { name: [...], email: [...] } } をそのままセット
@@ -32,6 +28,10 @@ function UserCreatePage() {
       }
     }
   };
+
+  if (!user) {
+    return <div>読み込み中...</div>;
+  }
 
   if  (user?.role !== "admin"){
      return <div>このページにアクセスする権限がありません。</div>;

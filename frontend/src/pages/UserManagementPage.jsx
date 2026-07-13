@@ -13,6 +13,7 @@ export default function UserManagementPage() {
   const [selectedDeleteUser, setSelectedDeleteUser] = useState(null);
   const [selectedRoleUser, setSelectedRoleUser] = useState(null);
   const [roleConfirm, setRoleConfirm] = useState(null);
+  const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
     fetch('/api/v1/users') // プロキシ設定が効いていればこれでOK
@@ -67,8 +68,11 @@ export default function UserManagementPage() {
             : user
         )
       );
-
+      setSuccessMessage(`${selectedRoleUser.name}さんの権限を「${roleLabel}」に変更しました。`);
       setSelectedRoleUser(null);
+      setTimeout(() => {  
+        setSuccessMessage("");
+      }, 3000);
     } catch (error) {
       console.error("権限更新エラー:", error);
     }
@@ -94,8 +98,12 @@ export default function UserManagementPage() {
           (user) => user.id !== selectedDeleteUser.id
         )
       );
-
+      setSuccessMessage(`${selectedDeleteUser.name}さんのユーザー情報を削除しました。`);
       setSelectedDeleteUser(null);
+      setTimeout(() => {  
+        setSuccessMessage("");
+      }, 3000);
+
     } catch (error) {
       console.error("削除エラー:", error);
     }
@@ -117,7 +125,13 @@ export default function UserManagementPage() {
             <p>
               全メンバーの情報管理と権限設定を行います。
             </p>
+            {successMessage && (
+              <div className="mb-4 rounded border border-green-300 bg-green-100 px-4 py-2 text-green-800">
+                {successMessage}
+              </div>
+            )}
           </div>
+
 
 
           <Button

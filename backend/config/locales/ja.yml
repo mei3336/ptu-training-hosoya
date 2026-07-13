@@ -11,6 +11,9 @@ ja:
   
   errors:
     format: "%{attribute}%{message}"
+    messages:
+      invalid_login: "メールアドレスまたはパスワードが違います。"
+
 
 
         

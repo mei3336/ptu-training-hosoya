@@ -15,6 +15,7 @@ export default function UserRoleModal({
       setRole(user.role);
     }
   }, [user]);
+  const originalRole = user?.role;
 
   if (!isOpen) return null;
 
@@ -61,6 +62,7 @@ export default function UserRoleModal({
             </Button>
 
             <Button
+              disabled={role === originalRole}
               onClick={() => onUpdate(user.id, role)}
             >
               更新する
