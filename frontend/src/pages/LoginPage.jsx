@@ -30,10 +30,10 @@ function LoginPage() {
         // Railsから届いた { errors: { name: [...], email: [...] } } をそのままセット
         setErrors(error.data.errors);
       } else {
-        alert('通信エラーが発生しました。');     
+        setErrors({ network: ["通信エラーが発生しました。時間をおいて再度お試しください。"] });
       }
     }
-  };  
+  };
 
   return (
     <div>
@@ -45,20 +45,28 @@ function LoginPage() {
         </p>
       ))}
 
-      <Input 
-        label="メールアドレス" 
-        name="email" 
+      {errors.network?.map((msg, index) => (
+        <p key={index} className="text-red-500">
+          {msg}
+        </p>
+      ))}
+
+      <Input
+        label="メールアドレス"
+        name="email"
         placeholder="メールアドレスを入力してください"
-        value={email} 
+        value={email}
         onChange={(e) => setEmail(e.target.value)}
+        error={errors.email}
       />
-      <Input 
-        label="パスワード" 
-        name="password" 
-        type="password" 
-        placeholder="パスワードを入力してください" 
-        value={password} 
-        onChange={(e) => setPassword(e.target.value)} 
+      <Input
+        label="パスワード"
+        name="password"
+        type="password"
+        placeholder="パスワードを入力してください"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        error={errors.password}
       />
 
       <Button variant="primary" onClick={handleLogin}>
