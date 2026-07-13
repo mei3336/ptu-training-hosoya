@@ -20,6 +20,7 @@ export default function UserManagementPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
 
   const filteredUsers = useMemo(() => {
     const keyword = searchTerm.trim().toLowerCase();
@@ -31,6 +32,34 @@ export default function UserManagementPage() {
         .some((value) => value.toLowerCase().includes(keyword))
     );
   }, [users, searchTerm]);
+
+  const sortedUsers = useMemo(() => {
+    if (!sortConfig.key) return filteredUsers;
+
+    const { key, direction } = sortConfig;
+    const sorted = [...filteredUsers].sort((a, b) => {
+      const cmp =
+        key === "id"
+          ? a.id - b.id
+          : (a[key] ?? "").toString().localeCompare((b[key] ?? "").toString(), "ja");
+
+      return direction === "asc" ? cmp : -cmp;
+    });
+
+    return sorted;
+  }, [filteredUsers, sortConfig]);
+
+  const handleSort = (key) => {
+    setSortConfig((prev) => {
+      if (prev.key !== key) return { key, direction: "asc" };
+      return { key, direction: prev.direction === "asc" ? "desc" : "asc" };
+    });
+  };
+
+  const sortIndicator = (key) => {
+    if (sortConfig.key !== key) return "";
+    return sortConfig.direction === "asc" ? " ▲" : " ▼";
+  };
 
   useEffect(() => {
     fetch('/api/v1/users') // プロキシ設定が効いていればこれでOK
@@ -192,16 +221,25 @@ export default function UserManagementPage() {
             <thead>
               <tr className="border-b">
                 <th>
-                  ID
+                  <button type="button" className="user-table-sort" onClick={() => handleSort("id")}>
+                    ID{sortIndicator("id")}
+                  </button>
                 </th>
                 <th>
-                  氏名 / ニックネーム
+                  <button type="button" className="user-table-sort" onClick={() => handleSort("name")}>
+                    氏名 / ニックネーム{sortIndicator("name")}
+                  </button>
                 </th>
                 <th>
-                  メールアドレス
+                  <button type="button" className="user-table-sort" onClick={() => handleSort("email")}>
+                    メールアドレス{sortIndicator("email")}
+                  </button>
                 </th>
                 <th>
-                  権限（クリックで切替）
+                  <button type="button" className="user-table-sort" onClick={() => handleSort("role")}>
+                    権限{sortIndicator("role")}
+                  </button>
+                  <span className="text-gray-400"> (バッジをクリックで切替)</span>
                 </th>
                 <th>
                   操作
@@ -210,7 +248,7 @@ export default function UserManagementPage() {
             </thead>
 
             <tbody>
-              {filteredUsers.map((user) => (
+              {sortedUsers.map((user) => (
                 <tr
                   key={user.id}
                 >
