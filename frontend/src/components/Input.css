@@ -39,6 +39,31 @@
   box-shadow: 0 0 0 3px #19726641;
 }
 
+.input-field-wrapper {
+  position: relative;
+}
+
+.input-field-with-toggle {
+  padding-right: 64px;
+}
+
+.input-toggle-visibility {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  color: #4b5563;
+  padding: 4px 6px;
+}
+
+.input-toggle-visibility:hover {
+  color: #1f2937;
+}
+
 .input-error-message {
   margin: 0;
   font-size: 14px;
