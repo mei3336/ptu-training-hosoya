@@ -11,8 +11,11 @@ function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleLogin = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     try{
       const response = await loginApi(email, password);
 
@@ -32,6 +35,8 @@ function LoginPage() {
       } else {
         setErrors({ network: ["通信エラーが発生しました。時間をおいて再度お試しください。"] });
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -69,8 +74,8 @@ function LoginPage() {
         error={errors.password}
       />
 
-      <Button variant="primary" onClick={handleLogin}>
-        ログイン
+      <Button variant="primary" onClick={handleLogin} disabled={isSubmitting}>
+        {isSubmitting ? "ログイン中..." : "ログイン"}
       </Button>
     </div>
   );

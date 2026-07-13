@@ -12,6 +12,7 @@ export default function ConfirmRoleModal({
   user,
   role,
   onConfirm,
+  isSubmitting = false,
 }) {
   if (!isOpen) return null;
 
@@ -31,14 +32,16 @@ export default function ConfirmRoleModal({
             <Button
               variant="secondary"
               onClick={onClose}
+              disabled={isSubmitting}
             >
               キャンセル
             </Button>
 
             <Button
               onClick={onConfirm}
+              disabled={isSubmitting}
             >
-              OK
+              {isSubmitting ? "処理中..." : "OK"}
             </Button>
           </div>
         </div>

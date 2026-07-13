@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 function UserForm({ mode = "create", initialData = {}, onSubmit, errors={}}) {
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [formData, setFormData] = React.useState({
     name: initialData.name || "",
     nickname: initialData.nickname || "",
@@ -46,10 +47,16 @@ function UserForm({ mode = "create", initialData = {}, onSubmit, errors={}}) {
   };
 
   
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    onSubmit(formData);
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      await onSubmit(formData);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
 
@@ -120,17 +127,20 @@ function UserForm({ mode = "create", initialData = {}, onSubmit, errors={}}) {
 
     </div>
     <div className="flex justify-end gap-2 mt-8">
-      <Button type="submit">
-        {mode === "create"
-          ? "登録する"
-          : "更新する"}
+      <Button type="submit" disabled={isSubmitting}>
+        {isSubmitting
+          ? "処理中..."
+          : mode === "create"
+            ? "登録する"
+            : "更新する"}
       </Button>
       <Button
         variant="secondary"
         onClick={() => navigate(-1)}
+        disabled={isSubmitting}
       >
         戻る
-      </Button>   
+      </Button>
     </div>
   </form>;
 }

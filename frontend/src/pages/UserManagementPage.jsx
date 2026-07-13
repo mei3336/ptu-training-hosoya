@@ -14,6 +14,7 @@ export default function UserManagementPage() {
   const [selectedRoleUser, setSelectedRoleUser] = useState(null);
   const [roleConfirm, setRoleConfirm] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     fetch('/api/v1/users') // プロキシ設定が効いていればこれでOK
@@ -40,6 +41,8 @@ export default function UserManagementPage() {
   }, []);
   
   const handleRoleUpdate = async (userId, role) => {
+    if (isProcessing) return;
+    setIsProcessing(true);
     try {
       const res = await fetch(
         `/api/v1/users/${userId}/update_role`,
@@ -76,11 +79,14 @@ export default function UserManagementPage() {
       }, 3000);
     } catch (error) {
       console.error("権限更新エラー:", error);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   const handleDelete = async () => {
-    if (!selectedDeleteUser) return;
+    if (!selectedDeleteUser || isProcessing) return;
+    setIsProcessing(true);
 
     try {
       const res = await fetch(
@@ -107,6 +113,8 @@ export default function UserManagementPage() {
 
     } catch (error) {
       console.error("削除エラー:", error);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -232,6 +240,7 @@ export default function UserManagementPage() {
         onClose={() => setSelectedDeleteUser(null)}
         user={selectedDeleteUser}
         onDelete={handleDelete}
+        isSubmitting={isProcessing}
       />
   
       <UserRoleModal
@@ -252,8 +261,9 @@ export default function UserManagementPage() {
         user={roleConfirm?.user}
         role={roleConfirm?.role}
         onClose={() => setRoleConfirm(null)}
-        onConfirm={() => {
-          handleRoleUpdate(
+        isSubmitting={isProcessing}
+        onConfirm={async () => {
+          await handleRoleUpdate(
             roleConfirm.userId,
             roleConfirm.role
           );

@@ -6,6 +6,7 @@ export default function UserDeleteModal({
   onClose,
   user,
   onDelete,
+  isSubmitting = false,
 }) {
   if (!isOpen) return null;
 
@@ -23,6 +24,7 @@ export default function UserDeleteModal({
                 <Button
                     variant="secondary"
                     onClick={onClose}
+                    disabled={isSubmitting}
                 >
                     キャンセル
                 </Button>
@@ -30,8 +32,9 @@ export default function UserDeleteModal({
                 <Button
                     variant="danger"
                     onClick={onDelete}
+                    disabled={isSubmitting}
                 >
-                    削除する
+                    {isSubmitting ? "削除中..." : "削除する"}
                 </Button>
             </div>
           </div>
