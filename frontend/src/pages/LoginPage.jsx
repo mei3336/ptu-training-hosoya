@@ -28,10 +28,10 @@ function LoginPage() {
         navigate("/members");
       }
     } catch (error) {
-      if (error.response && error.response.status === 401) {
-        console.log("validation errors", error.response.data.errors);
+      if (error.status === 401) {
+        console.log("validation errors", error.data);
         // Railsから届いた { errors: { name: [...], email: [...] } } をそのままセット
-        setErrors(error.response.data.errors);
+        setErrors(error.data.errors);
       } else {
         alert('通信エラーが発生しました。');     
       }
@@ -47,7 +47,7 @@ function LoginPage() {
           {msg}
         </p>
       ))}
-      
+
       <Input 
         label="メールアドレス" 
         name="email" 
