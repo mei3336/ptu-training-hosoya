@@ -6,7 +6,19 @@ class Api::V1::AuthController < ApplicationController
   def login
     user = User.find_by(email: params[:email])
 
+    if user&.locked?
+      return render json: {
+        errors: {
+          login: [
+            I18n.t("errors.messages.account_locked")
+          ]
+        }
+      }, status: :locked
+    end
+
     if user&.authenticate(params[:password])
+      user.reset_login_failure_count!
+
       token = JWT.encode(
         {
           user_id: user.id,
@@ -36,6 +48,8 @@ class Api::V1::AuthController < ApplicationController
         }
       }, status: :ok
     else
+      user&.register_login_failure!
+
       render json: {
         errors: {
           login: [

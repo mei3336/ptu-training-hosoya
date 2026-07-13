@@ -13,6 +13,7 @@ ja:
     format: "%{attribute}%{message}"
     messages:
       invalid_login: "メールアドレスまたはパスワードが違います。"
+      account_locked: "ログイン試行回数が上限に達したため、アカウントが一時的にロックされています。15分ほど時間をおいて再度お試しください。"
 
 
 
