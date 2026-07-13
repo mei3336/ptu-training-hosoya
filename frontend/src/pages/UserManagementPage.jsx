@@ -61,6 +61,25 @@ export default function UserManagementPage() {
     return sortConfig.direction === "asc" ? " ▲" : " ▼";
   };
 
+  const PAGE_SIZE = 10;
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // 検索・ソート条件が変わったら1ページ目に戻す(レンダー中に安全に調整する)
+  const filterKey = `${searchTerm}|${sortConfig.key}|${sortConfig.direction}`;
+  const [appliedFilterKey, setAppliedFilterKey] = useState(filterKey);
+  if (filterKey !== appliedFilterKey) {
+    setAppliedFilterKey(filterKey);
+    setCurrentPage(1);
+  }
+
+  const totalPages = Math.max(1, Math.ceil(sortedUsers.length / PAGE_SIZE));
+  const safePage = Math.min(currentPage, totalPages);
+
+  const paginatedUsers = useMemo(() => {
+    const start = (safePage - 1) * PAGE_SIZE;
+    return sortedUsers.slice(start, start + PAGE_SIZE);
+  }, [sortedUsers, safePage]);
+
   useEffect(() => {
     fetch('/api/v1/users') // プロキシ設定が効いていればこれでOK
       .then(res => {
@@ -248,7 +267,7 @@ export default function UserManagementPage() {
             </thead>
 
             <tbody>
-              {sortedUsers.map((user) => (
+              {paginatedUsers.map((user) => (
                 <tr
                   key={user.id}
                 >
@@ -304,6 +323,28 @@ export default function UserManagementPage() {
             </tbody>
           </table>
         </div>
+        )}
+
+        {!isLoading && !loadError && sortedUsers.length > 0 && totalPages > 1 && (
+          <div className="flex items-center justify-center gap-4 mt-4">
+            <Button
+              variant="secondary"
+              onClick={() => setCurrentPage(Math.max(1, safePage - 1))}
+              disabled={safePage === 1}
+            >
+              前へ
+            </Button>
+            <span>
+              {safePage} / {totalPages} ページ
+            </span>
+            <Button
+              variant="secondary"
+              onClick={() => setCurrentPage(Math.min(totalPages, safePage + 1))}
+              disabled={safePage === totalPages}
+            >
+              次へ
+            </Button>
+          </div>
         )}
       </div>
 
