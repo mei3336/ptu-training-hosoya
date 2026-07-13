@@ -1,6 +1,6 @@
 import React from "react";
 import Button from "@/components/Button";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { logout as logoutApi } from "@/services/authService";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -35,9 +35,9 @@ function Header() {
         <div className="header-content">
           <h1 className="header-title">地域コミュニティ</h1>
           <nav className="header-nav">
-            <a href="/members" className="header-link">メンバー一覧</a>
-            <a href="/mypage" className="header-link">マイページ</a>
-            <a href="/users" className="header-link">名簿管理（管理者専用）</a>
+            <Link to="/members" className="header-link">メンバー一覧</Link>
+            <Link to="/mypage" className="header-link">マイページ</Link>
+            <Link to="/users" className="header-link">名簿管理（管理者専用）</Link>
           </nav>
           <div className="flex items-center justify-end gap-4 mt-8">
             <span>ログイン中：<br /> {user?.name}さん</span>
@@ -58,8 +58,8 @@ function Header() {
         <div className="header-content">
           <h1 className="header-title">地域コミュニティ</h1>
           <nav className="header-nav">
-            <a href="/members" className="header-link">メンバー一覧</a>
-            <a href="/mypage" className="header-link">マイページ</a>
+            <Link to="/members" className="header-link">メンバー一覧</Link>
+            <Link to="/mypage" className="header-link">マイページ</Link>
           </nav>
           <div className="flex items-center justify-end gap-4 mt-8">
             <span>ログイン中：<br /> {user?.name}さん</span>

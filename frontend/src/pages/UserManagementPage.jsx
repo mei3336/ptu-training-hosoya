@@ -1,19 +1,36 @@
-import React, { useEffect,useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Button from "../components/Button";
+import Input from "../components/Input";
 import { useNavigate } from "react-router-dom";
 import UserDeleteModal from "@/components/UserDelateModal";
 import UserRoleModal from "@/components/UserRoleEditModal";
 import { useAuth } from "../contexts/AuthContext";
+import { useToast } from "@/contexts/ToastContext";
 import ConfirmRoleModal from "@/components/RoleConfirmModal";
 
 export default function UserManagementPage() {
   const navigate = useNavigate();
   const { user:  currentUser } = useAuth();
+  const { showToast } = useToast();
   const [users, setUsers] = useState([]);
   const [selectedDeleteUser, setSelectedDeleteUser] = useState(null);
   const [selectedRoleUser, setSelectedRoleUser] = useState(null);
   const [roleConfirm, setRoleConfirm] = useState(null);
-  const [successMessage, setSuccessMessage] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredUsers = useMemo(() => {
+    const keyword = searchTerm.trim().toLowerCase();
+    if (!keyword) return users;
+
+    return users.filter((user) =>
+      [user.name, user.nickname]
+        .filter(Boolean)
+        .some((value) => value.toLowerCase().includes(keyword))
+    );
+  }, [users, searchTerm]);
 
   useEffect(() => {
     fetch('/api/v1/users') // プロキシ設定が効いていればこれでOK
@@ -24,10 +41,10 @@ export default function UserManagementPage() {
         return res.json();
       })
       .then(data => {
-        console.log("取得データ:", data); // これがブラウザのコンソールに出るか確認
         const formattedMembers = data.map(user => ({
           id: user.id,             // Railsの user_id を id に統一
           name: user.name,
+          nickname: user.nickname,
           email: user.email,
           role: user.role,              // "admin" や "member" という文字列
           // ここで役割に応じたラベルを生成する
@@ -37,10 +54,16 @@ export default function UserManagementPage() {
       })
       .catch(err => {
         console.error("データ取得エラー:", err);
+        setLoadError("名簿の取得に失敗しました。時間をおいて再度お試しください。");
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   }, []);
   
   const handleRoleUpdate = async (userId, role) => {
+    if (isProcessing) return;
+    setIsProcessing(true);
     try {
       const res = await fetch(
         `/api/v1/users/${userId}/update_role`,
@@ -70,18 +93,19 @@ export default function UserManagementPage() {
       );
       const roleLabel =
         role === "admin" ? "管理者" : "一般メンバー";
-      setSuccessMessage(`${selectedRoleUser.name}さんの権限を「${roleLabel}」に変更しました。`);
+      showToast(`${selectedRoleUser.name}さんの権限を「${roleLabel}」に変更しました。`);
       setSelectedRoleUser(null);
-      setTimeout(() => {  
-        setSuccessMessage("");
-      }, 3000);
     } catch (error) {
       console.error("権限更新エラー:", error);
+      showToast("権限の更新に失敗しました。", "error");
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   const handleDelete = async () => {
-    if (!selectedDeleteUser) return;
+    if (!selectedDeleteUser || isProcessing) return;
+    setIsProcessing(true);
 
     try {
       const res = await fetch(
@@ -100,14 +124,13 @@ export default function UserManagementPage() {
           (user) => user.id !== selectedDeleteUser.id
         )
       );
-      setSuccessMessage(`${selectedDeleteUser.name}さんのユーザー情報を削除しました。`);
+      showToast(`${selectedDeleteUser.name}さんのユーザー情報を削除しました。`);
       setSelectedDeleteUser(null);
-      setTimeout(() => {  
-        setSuccessMessage("");
-      }, 3000);
-
     } catch (error) {
       console.error("削除エラー:", error);
+      showToast("削除に失敗しました。", "error");
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -127,11 +150,6 @@ export default function UserManagementPage() {
             <p>
               全メンバーの情報管理と権限設定を行います。
             </p>
-            {successMessage && (
-              <div className="mb-4 rounded border border-green-300 bg-green-100 px-4 py-2 text-green-800">
-                {successMessage}
-              </div>
-            )}
           </div>
 
 
@@ -145,7 +163,30 @@ export default function UserManagementPage() {
 
         </div>
 
+        {isLoading && <p className="mb-4">読み込み中...</p>}
+
+        {loadError && (
+          <p className="mb-4 text-red-500">{loadError}</p>
+        )}
+
+        {!isLoading && !loadError && (
+          <div className="mb-4 max-w-sm">
+            <Input
+              label="氏名・ニックネームで検索"
+              name="userSearch"
+              placeholder="氏名やニックネームを入力"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        )}
+
+        {!isLoading && !loadError && filteredUsers.length === 0 && (
+          <p className="mb-4 text-gray-500">該当するメンバーが見つかりませんでした。</p>
+        )}
+
         {/* Table */}
+        {!isLoading && !loadError && filteredUsers.length > 0 && (
         <div className="user-table-wrapper">
           <table className="user-table">
             <thead>
@@ -169,7 +210,7 @@ export default function UserManagementPage() {
             </thead>
 
             <tbody>
-              {users.map((user) => (
+              {filteredUsers.map((user) => (
                 <tr
                   key={user.id}
                 >
@@ -225,6 +266,7 @@ export default function UserManagementPage() {
             </tbody>
           </table>
         </div>
+        )}
       </div>
 
       {/*モーダル*/}
@@ -233,6 +275,7 @@ export default function UserManagementPage() {
         onClose={() => setSelectedDeleteUser(null)}
         user={selectedDeleteUser}
         onDelete={handleDelete}
+        isSubmitting={isProcessing}
       />
   
       <UserRoleModal
@@ -253,8 +296,9 @@ export default function UserManagementPage() {
         user={roleConfirm?.user}
         role={roleConfirm?.role}
         onClose={() => setRoleConfirm(null)}
-        onConfirm={() => {
-          handleRoleUpdate(
+        isSubmitting={isProcessing}
+        onConfirm={async () => {
+          await handleRoleUpdate(
             roleConfirm.userId,
             roleConfirm.role
           );

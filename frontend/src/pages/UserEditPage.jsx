@@ -5,10 +5,12 @@ import { editUser } from "../services/userService";
 import { useNavigate } from "react-router-dom";
 import { getCurrentUser } from "../services/authService";
 import { useAuth } from "../contexts/AuthContext";
+import { useToast } from "@/contexts/ToastContext";
 
 function UserEditPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { showToast } = useToast();
   const { id } = useParams();
   const [profile, setProfile] = useState(null);
   const [errors, setErrors] = React.useState({});
@@ -37,30 +39,33 @@ function UserEditPage() {
     
     const handleSubmit = async (formData) => {
         const targetId = id || profile.user_id;
-        console.log("ページの親の中", formData);
-        console.log(formData.icon_image);
         try {
           await editUser(targetId, formData);
-          alert("ユーザー情報を更新しました！");
+          showToast("ユーザー情報を更新しました！");
           navigate(-1);
 
         } catch (error) {
           if (error.response && error.response.status === 422) {
-            console.log("validation errors", error.response.data.errors);
             // Railsから届いた { errors: { name: [...], email: [...] } } をそのままセット
             setErrors(error.response.data.errors);
           } else {
-            alert('通信エラーが発生しました。');
+            showToast("通信エラーが発生しました。", "error");
           }
         }
     };
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/");
+    }
+  }, [user, navigate]);
 
   if (!profile) {
     return <div>読み込み中...</div>;
   }
 
   if (!user) {
-    return  navigate("/");
+    return null;
   }
 
   return (

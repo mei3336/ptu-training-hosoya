@@ -11,14 +11,15 @@ function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleLogin = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     try{
       const response = await loginApi(email, password);
 
       if (response.result === "success") {
-        console.log("navigate前");
-
         login({
           id: response.user.id,
           role: response.user.role,
@@ -29,14 +30,15 @@ function LoginPage() {
       }
     } catch (error) {
       if (error.status === 401) {
-        console.log("validation errors", error.data);
         // Railsから届いた { errors: { name: [...], email: [...] } } をそのままセット
         setErrors(error.data.errors);
       } else {
-        alert('通信エラーが発生しました。');     
+        setErrors({ network: ["通信エラーが発生しました。時間をおいて再度お試しください。"] });
       }
+    } finally {
+      setIsSubmitting(false);
     }
-  };  
+  };
 
   return (
     <div>
@@ -48,24 +50,32 @@ function LoginPage() {
         </p>
       ))}
 
-      <Input 
-        label="メールアドレス" 
-        name="email" 
+      {errors.network?.map((msg, index) => (
+        <p key={index} className="text-red-500">
+          {msg}
+        </p>
+      ))}
+
+      <Input
+        label="メールアドレス"
+        name="email"
         placeholder="メールアドレスを入力してください"
-        value={email} 
+        value={email}
         onChange={(e) => setEmail(e.target.value)}
+        error={errors.email}
       />
-      <Input 
-        label="パスワード" 
-        name="password" 
-        type="password" 
-        placeholder="パスワードを入力してください" 
-        value={password} 
-        onChange={(e) => setPassword(e.target.value)} 
+      <Input
+        label="パスワード"
+        name="password"
+        type="password"
+        placeholder="パスワードを入力してください"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        error={errors.password}
       />
 
-      <Button variant="primary" onClick={handleLogin}>
-        ログイン
+      <Button variant="primary" onClick={handleLogin} disabled={isSubmitting}>
+        {isSubmitting ? "ログイン中..." : "ログイン"}
       </Button>
     </div>
   );
