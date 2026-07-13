@@ -36,6 +36,10 @@ function validateForm(data, mode) {
     }
   }
 
+  if (passwordProvided && data.password !== data.passwordConfirmation) {
+    errors.passwordConfirmation = ["がパスワードと一致しません。"];
+  }
+
   if (data.nickname && data.nickname.length > 15) {
     errors.nickname = ["は15文字以内で入力してください。"];
   }
@@ -57,6 +61,7 @@ function UserForm({ mode = "create", initialData = {}, onSubmit, errors={}}) {
     email: initialData.email || "",
     bio: initialData.bio || "",
     password: "",
+    passwordConfirmation: "",
     role: initialData.role || "member",
     icon_image: null,
   });
@@ -111,7 +116,9 @@ function UserForm({ mode = "create", initialData = {}, onSubmit, errors={}}) {
 
     setIsSubmitting(true);
     try {
-      await onSubmit(formData);
+      const submitData = { ...formData };
+      delete submitData.passwordConfirmation;
+      await onSubmit(submitData);
     } finally {
       setIsSubmitting(false);
     }
@@ -142,6 +149,17 @@ function UserForm({ mode = "create", initialData = {}, onSubmit, errors={}}) {
           value={formData.password}
           onChange={handleChange}
           error={displayErrors.password}
+        />
+      </div>
+
+      <div>
+        <Input
+          label="パスワード（確認用） *"
+          type="password"
+          name="passwordConfirmation"
+          value={formData.passwordConfirmation}
+          onChange={handleChange}
+          error={displayErrors.passwordConfirmation}
         />
       </div>
 
