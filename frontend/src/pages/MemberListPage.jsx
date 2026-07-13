@@ -1,13 +1,21 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import MemberCard from "../components/MemberCard";
 import UserDetailModal from "../components/UserDetailModal";
 import { useAuth } from "../contexts/AuthContext";
 
 function MemberListPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const [members, setMembers] = useState([]);
   const [selectedMember, setSelectedMember] = useState(null);
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/");
+    }
+  }, [user, navigate]);
 
   useEffect(() => {
     console.log("ログインユーザー", user);
@@ -29,7 +37,7 @@ function MemberListPage() {
   }, []);
   
   if (!user) {
-    return  navigate("/");
+    return null;
   }
   return (
     <div>
