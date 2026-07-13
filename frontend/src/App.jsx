@@ -10,7 +10,8 @@ import MemberListPage from "./pages/MemberListPage";
 import UserCreatePage from "./pages/UserCreatePage";
 import UserEditPage from "./pages/UserEditPage";
 import UserManagementPage from "./pages/UserManagementPage";
-import MyPage from "./pages/MyPage"; 
+import MyPage from "./pages/MyPage";
+import NotFoundPage from "./pages/NotFoundPage";
 import MainLayout from "./layouts/MainLayout";
 import "./App.css";
 
@@ -110,6 +111,15 @@ function App() {
                   <UserEditPage/>
                 </MainLayout>
               </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="*"
+            element={
+              <MainLayout>
+                <NotFoundPage />
+              </MainLayout>
             }
           />
 
