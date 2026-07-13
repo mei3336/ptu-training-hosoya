@@ -68,6 +68,8 @@ export default function UserManagementPage() {
             : user
         )
       );
+      const roleLabel =
+        role === "admin" ? "管理者" : "一般メンバー";
       setSuccessMessage(`${selectedRoleUser.name}さんの権限を「${roleLabel}」に変更しました。`);
       setSelectedRoleUser(null);
       setTimeout(() => {  
