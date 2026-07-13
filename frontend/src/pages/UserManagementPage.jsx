@@ -4,16 +4,17 @@ import { useNavigate } from "react-router-dom";
 import UserDeleteModal from "@/components/UserDelateModal";
 import UserRoleModal from "@/components/UserRoleEditModal";
 import { useAuth } from "../contexts/AuthContext";
+import { useToast } from "@/contexts/ToastContext";
 import ConfirmRoleModal from "@/components/RoleConfirmModal";
 
 export default function UserManagementPage() {
   const navigate = useNavigate();
   const { user:  currentUser } = useAuth();
+  const { showToast } = useToast();
   const [users, setUsers] = useState([]);
   const [selectedDeleteUser, setSelectedDeleteUser] = useState(null);
   const [selectedRoleUser, setSelectedRoleUser] = useState(null);
   const [roleConfirm, setRoleConfirm] = useState(null);
-  const [successMessage, setSuccessMessage] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
@@ -78,13 +79,11 @@ export default function UserManagementPage() {
       );
       const roleLabel =
         role === "admin" ? "管理者" : "一般メンバー";
-      setSuccessMessage(`${selectedRoleUser.name}さんの権限を「${roleLabel}」に変更しました。`);
+      showToast(`${selectedRoleUser.name}さんの権限を「${roleLabel}」に変更しました。`);
       setSelectedRoleUser(null);
-      setTimeout(() => {  
-        setSuccessMessage("");
-      }, 3000);
     } catch (error) {
       console.error("権限更新エラー:", error);
+      showToast("権限の更新に失敗しました。", "error");
     } finally {
       setIsProcessing(false);
     }
@@ -111,14 +110,11 @@ export default function UserManagementPage() {
           (user) => user.id !== selectedDeleteUser.id
         )
       );
-      setSuccessMessage(`${selectedDeleteUser.name}さんのユーザー情報を削除しました。`);
+      showToast(`${selectedDeleteUser.name}さんのユーザー情報を削除しました。`);
       setSelectedDeleteUser(null);
-      setTimeout(() => {  
-        setSuccessMessage("");
-      }, 3000);
-
     } catch (error) {
       console.error("削除エラー:", error);
+      showToast("削除に失敗しました。", "error");
     } finally {
       setIsProcessing(false);
     }
@@ -140,11 +136,6 @@ export default function UserManagementPage() {
             <p>
               全メンバーの情報管理と権限設定を行います。
             </p>
-            {successMessage && (
-              <div className="mb-4 rounded border border-green-300 bg-green-100 px-4 py-2 text-green-800">
-                {successMessage}
-              </div>
-            )}
           </div>
 
 

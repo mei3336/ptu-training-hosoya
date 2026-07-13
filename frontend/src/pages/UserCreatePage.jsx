@@ -4,17 +4,19 @@ import { createUser } from "../services/userService";
 import { useNavigate } from "react-router-dom";
 //import { useMembers } from "../components/hooks/useMembers";
 import { useAuth } from "../contexts/AuthContext";
+import { useToast } from "@/contexts/ToastContext";
 
 function UserCreatePage() {
   //const { createUser } = useMembers();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [errors, setErrors] = React.useState({});
 
   const handleSubmit = async (formData) => {
     try {
       await createUser(formData);
-      alert("メンバー登録が完了しました！");
+      showToast("メンバー登録が完了しました！");
       navigate("/users");
 
     } catch (error) {
@@ -22,7 +24,7 @@ function UserCreatePage() {
         // Railsから届いた { errors: { name: [...], email: [...] } } をそのままセット
         setErrors(error.response.data.errors);
       } else {
-        alert('通信エラーが発生しました。');     
+        showToast("通信エラーが発生しました。", "error");
       }
     }
   };
