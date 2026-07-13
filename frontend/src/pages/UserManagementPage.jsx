@@ -15,6 +15,8 @@ export default function UserManagementPage() {
   const [roleConfirm, setRoleConfirm] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
 
   useEffect(() => {
     fetch('/api/v1/users') // プロキシ設定が効いていればこれでOK
@@ -37,6 +39,10 @@ export default function UserManagementPage() {
       })
       .catch(err => {
         console.error("データ取得エラー:", err);
+        setLoadError("名簿の取得に失敗しました。時間をおいて再度お試しください。");
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   }, []);
   
@@ -152,7 +158,14 @@ export default function UserManagementPage() {
 
         </div>
 
+        {isLoading && <p className="mb-4">読み込み中...</p>}
+
+        {loadError && (
+          <p className="mb-4 text-red-500">{loadError}</p>
+        )}
+
         {/* Table */}
+        {!isLoading && !loadError && (
         <div className="user-table-wrapper">
           <table className="user-table">
             <thead>
@@ -232,6 +245,7 @@ export default function UserManagementPage() {
             </tbody>
           </table>
         </div>
+        )}
       </div>
 
       {/*モーダル*/}

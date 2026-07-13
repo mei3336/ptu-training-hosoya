@@ -10,6 +10,8 @@ function MemberListPage() {
 
   const [members, setMembers] = useState([]);
   const [selectedMember, setSelectedMember] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
 
   useEffect(() => {
     if (!user) {
@@ -31,16 +33,30 @@ function MemberListPage() {
       })
       .catch(err => {
         console.error("データ取得エラー:", err);
+        setLoadError("メンバー一覧の取得に失敗しました。時間をおいて再度お試しください。");
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   }, []);
-  
+
   if (!user) {
     return null;
   }
   return (
     <div>
       <h1>メンバー一覧</h1>
-      
+
+      {isLoading && <p className="mt-4">読み込み中...</p>}
+
+      {loadError && (
+        <p className="mt-4 text-red-500">{loadError}</p>
+      )}
+
+      {!isLoading && !loadError && members.length === 0 && (
+        <p className="mt-4 text-gray-500">登録されているメンバーがいません。</p>
+      )}
+
       <div className="member-list">
         {members.map((member) => (
           <MemberCard
